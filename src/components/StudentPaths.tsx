@@ -207,6 +207,8 @@ export default function StudentPaths({
     e.preventDefault();
     executeAnswerEvaluation(userAnswer);
   };
+
+  const handleNextQuestion = () => {
     if (questionIndex < lessonQuestions.length - 1) {
       setQuestionIndex(prev => prev + 1);
       setUserAnswer('');
@@ -407,6 +409,7 @@ export default function StudentPaths({
             </p>
           </div>
         </div>
+      );
     }
 
     if (type === 'transform-sandbox' || type === 'symmetry-playground') {
