@@ -5,6 +5,8 @@
 
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
+import { exec } from 'child_process';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -17,7 +19,7 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Lazy-initialized Gemini API Client wrapper
+// Lazy-initialized Gemini API Client wrapper (fallback only)
 let aiClient: any = null;
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -38,9 +40,255 @@ function getGeminiClient() {
   return aiClient;
 }
 
+// Dynamic Client Initializer
+function createDynamicClient(apiKey: string | undefined) {
+  const key = apiKey || process.env.GEMINI_API_KEY;
+  if (!key || key.trim() === '' || key.includes('MY_GEMINI_API_KEY')) {
+    return null;
+  }
+  return new GoogleGenAI({
+    apiKey: key.trim(),
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
+}
+
+// Model Fallback Retry Helper
+async function generateContentWithFallback(
+  ai: any,
+  contents: any,
+  systemPrompt: string,
+  preferredModel: string | undefined,
+  temperature: number = 0.7
+) {
+  const defaultModels = ['gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-2.5-flash'];
+  
+  const queue: string[] = [];
+  if (preferredModel && preferredModel.trim() !== '') {
+    queue.push(preferredModel.trim());
+  }
+  for (const m of defaultModels) {
+    if (!queue.includes(m)) {
+      queue.push(m);
+    }
+  }
+
+  console.log(`[AI Fallback] Preferred Model: ${preferredModel}. Queue: ${JSON.stringify(queue)}`);
+
+  let lastError: any = null;
+  for (const model of queue) {
+    try {
+      console.log(`[AI Fallback] Trying model: ${model}`);
+      const response = await ai.models.generateContent({
+        model: model,
+        contents,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: temperature,
+        }
+      });
+      console.log(`[AI Fallback] Success with model: ${model}`);
+      return response;
+    } catch (err: any) {
+      console.error(`[AI Fallback] Failed with model ${model}: ${err.message || err}`);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("All models in the fallback queue failed to generate content.");
+}
+
 // Health status endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// Personalized Homework DOCX Export
+app.get('/api/export/docx', (req: express.Request, res: express.Response) => {
+  const { studentId = 'student_minh', lang = 'vi', apiKey = '' } = req.query;
+  const fileName = `Vinschool_Homework_${studentId}_${Date.now()}.docx`;
+  const exportDir = path.join(process.cwd(), 'assets', 'exports');
+  const filePath = path.join(exportDir, fileName);
+
+  // Ensure export directory exists
+  if (!fs.existsSync(exportDir)) {
+    fs.mkdirSync(exportDir, { recursive: true });
+  }
+
+  const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
+  const command = `"${uvPath}" run generate_docx.py ${studentId} ${lang} "${filePath}"`;
+
+  console.log(`[DOCX] Executing command: ${command}`);
+
+  const apiKeyStr = (apiKey as string) || process.env.GEMINI_API_KEY || '';
+  exec(command, { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`[DOCX] Generation error: ${error.message}`);
+      console.error(`stderr: ${stderr}`);
+      res.status(500).json({ error: "Failed to generate DOCX document", details: error.message });
+      return;
+    }
+    console.log(`[DOCX] stdout: ${stdout}`);
+    res.download(filePath, (err) => {
+      if (err) {
+        console.error("[DOCX] Error sending file:", err);
+      }
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.warn("[DOCX] Could not delete temporary file:", e);
+      }
+    });
+  });
+});
+
+// Personalized Review Slides PPTX Export
+app.get('/api/export/pptx', (req: express.Request, res: express.Response) => {
+  const { studentId = 'student_minh', lang = 'vi', apiKey = '' } = req.query;
+  const fileName = `Vinschool_Review_${studentId}_${Date.now()}.pptx`;
+  const exportDir = path.join(process.cwd(), 'assets', 'exports');
+  const filePath = path.join(exportDir, fileName);
+
+  if (!fs.existsSync(exportDir)) {
+    fs.mkdirSync(exportDir, { recursive: true });
+  }
+
+  const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
+  const command = `"${uvPath}" run generate_pptx.py ${studentId} ${lang} "${filePath}"`;
+
+  console.log(`[PPTX] Executing command: ${command}`);
+
+  const apiKeyStr = (apiKey as string) || process.env.GEMINI_API_KEY || '';
+  exec(command, { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`[PPTX] Generation error: ${error.message}`);
+      console.error(`stderr: ${stderr}`);
+      res.status(500).json({ error: "Failed to generate PPTX document", details: error.message });
+      return;
+    }
+    console.log(`[PPTX] stdout: ${stdout}`);
+    res.download(filePath, (err) => {
+      if (err) {
+        console.error("[PPTX] Error sending file:", err);
+      }
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.warn("[PPTX] Could not delete temporary file:", e);
+      }
+    });
+  });
+});
+
+// AI Multi-Agent Reflection Proof Grader
+app.post('/api/gemini/grade-reflection', async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { studentId, lessonId, answers, lang = 'vi' } = req.body;
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+    const ai = createDynamicClient(apiKeyHeader);
+
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      res.status(400).json({ error: "Answers list is required" });
+      return;
+    }
+
+    // Fallback logic if Gemini is offline/disabled
+    if (!ai) {
+      console.warn("No API key provided or dynamic client failed. Initiating offline Smart AI Grader logic.");
+      let totalLength = 0;
+      let containsMathSymbols = false;
+      const mathKeywords = ['denomin', 'decimal', 'place', 'value', 'fraction', 'mẫu số', 'tử số', 'quy đồng', 'phẩy', 'quay', 'đối xứng', 'tịnh tiến'];
+      
+      answers.forEach(a => {
+        const text = (a.response || '').toLowerCase();
+        totalLength += text.length;
+        if (mathKeywords.some(kw => text.includes(kw)) || /[\d\/\+\-\*]/.test(text)) {
+          containsMathSymbols = true;
+        }
+      });
+
+      let grade = "Good";
+      let feedback = "";
+      if (totalLength < 10) {
+        grade = "Needs Work";
+        feedback = lang === 'en'
+          ? "Your reflection is very brief. Please elaborate on your mathematical steps next time."
+          : "Phần tự ngẫm của em khá ngắn. Lần tới em hãy giải thích chi tiết hơn các bước tư duy nhé.";
+      } else if (containsMathSymbols && totalLength > 25) {
+        grade = "Master";
+        feedback = lang === 'en'
+          ? "Excellent mathematical reasoning. You correctly justified your steps using key terminology."
+          : "Lập luận toán học xuất sắc. Em đã giải thích các bước của mình rất rõ ràng bằng thuật ngữ chính xác.";
+      } else {
+        grade = "Good";
+        feedback = lang === 'en'
+          ? "Good effort in your reflection. Focus on explaining why your calculations make sense."
+          : "Nội dung tự ngẫm tốt. Em nên tập trung giải thích rõ hơn lý do đằng sau các phép tính.";
+      }
+
+      res.json({ grade, feedback, isOfflineMode: true });
+      return;
+    }
+
+    // Multi-Agent Gemini Prompt Workflow
+    const systemPrompt = `
+    You are a Senior Cambridge Math Educator grading student reflection logs for Grade 6 Vinschool.
+    Evaluate the student's mathematical proof and reasoning.
+    Provide a grade: 'Master' (Thành thạo), 'Good' (Khá), or 'Needs Work' (Cần hoàn thiện).
+    Also write a warm, encouraging feedback sentence in ${lang === 'vi' ? 'Vietnamese' : 'English'} (max 2 sentences).
+    Analyze these points:
+    1. Did they understand the concept?
+    2. Did they use proper terms like "place value", "denominator", "tịnh tiến", "đối xứng"?
+    
+    Format your response EXACTLY as a JSON object matching this schema:
+    {
+      "grade": "Master" | "Good" | "Needs Work",
+      "feedback": "Your feedback text here"
+    }
+    Do not add any markdown blocks around it. Return raw JSON.
+    `;
+
+    const userPrompt = `
+    Student ID: ${studentId}
+    Lesson: ${lessonId}
+    Reflection Logs:
+    ${answers.map((a, i) => `Question ${i+1}: "${a.question}"\nResponse: "${a.response}"`).join('\n\n')}
+    `;
+
+    console.log(`Sending reflection log to Gemini with fallback grading...`);
+    const contents = [{ role: 'user', parts: [{ text: userPrompt }] }];
+    const response = await generateContentWithFallback(
+      ai,
+      contents,
+      systemPrompt,
+      modelHeader,
+      0.2
+    );
+
+    const resultText = response.text || '';
+    console.log(`Gemini response: ${resultText}`);
+    
+    try {
+      const parsed = JSON.parse(resultText.trim());
+      res.json(parsed);
+    } catch (e) {
+      res.json({
+        grade: "Good",
+        feedback: lang === 'en' 
+          ? "Thank you for sharing your thoughts. Keep working hard!" 
+          : "Cảm ơn em đã chia sẻ suy nghĩ. Hãy tiếp tục cố gắng nhé!"
+      });
+    }
+  } catch (error: any) {
+    console.error("Error in AI Grader route:", error);
+    const isRateLimit = error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+    const status = isRateLimit ? 429 : 500;
+    res.status(status).json({ error: error.message || "Failed to grade reflection" });
+  }
 });
 
 // AI Socratic Math Coach endpoint
@@ -58,11 +306,13 @@ app.post('/api/gemini/tutor', async (req: express.Request, res: express.Response
       chosenLanguage = 'vi' // 'en' or 'vi'
     } = req.body;
 
-    const ai = getGeminiClient();
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+    const ai = createDynamicClient(apiKeyHeader);
 
     // Fallback: If no Gemini API key, generate Socratic response locally based on language
     if (!ai) {
-      console.warn("GEMINI_API_KEY is not defined. Initiating offline Smart AI Coach logic.");
+      console.warn("No API key provided or dynamic client failed. Initiating offline Smart AI Coach logic.");
       
       let mockReply = "";
       if (chosenLanguage === 'en') {
@@ -143,15 +393,14 @@ Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${
       parts: [{ text: userPrompt }]
     });
 
-    console.log(`Sending prompt to Gemini-3.5-flash in ${chosenLanguage.toUpperCase()}...`);
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+    console.log(`Sending prompt to Gemini with fallback...`);
+    const response = await generateContentWithFallback(
+      ai,
       contents,
-      config: {
-        systemInstruction: systemPrompt,
-        temperature: 0.7,
-      }
-    });
+      systemPrompt,
+      modelHeader,
+      0.7
+    );
 
     console.log("Response fetched from Gemini successfully.");
     res.json({
@@ -163,9 +412,10 @@ Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${
 
   } catch (error: any) {
     console.error("Error inside Socratic AI Tutor Route:", error);
-    res.status(500).json({
-      error: "Could not request Socratic response",
-      details: error.message
+    const isRateLimit = error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+    const status = isRateLimit ? 429 : 500;
+    res.status(status).json({
+      error: error.message || "Could not request Socratic response"
     });
   }
 });
