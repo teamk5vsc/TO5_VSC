@@ -52,7 +52,7 @@ def create_presentation(student_name, lang, slides_data, filepath):
     apply_background(slide1, NAVY)
 
     # Title text
-    add_title(slide1, "VINSCHOOL MATH EXPLORER" if lang == 'en' else "HỆ THỐNG TOÁN HỌC VINSCHOOL", CORAL, size=38, top=1.2)
+    add_title(slide1, "CAMBRIDGE MATH EXPLORER" if lang == 'en' else "HỆ THỐNG TOÁN HỌC CAMBRIDGE", CORAL, size=38, top=1.2)
     
     sub_box = slide1.shapes.add_textbox(Inches(1.0), Inches(2.3), Inches(8.0), Inches(1.5))
     tf = sub_box.text_frame
@@ -176,7 +176,7 @@ def get_personalized_slides(student_id, lang):
             client = genai.Client(api_key=api_key)
             
             prompt = f"""
-            You are a Cambridge Stage 6 Math Curriculum specialist for Vinschool.
+            You are a Cambridge Stage 6 Math Curriculum specialist.
             Write a 3-slide classroom review presentation text for student '{student_id}' in language '{lang}'.
             Focus on decimals place values and transformations.
             Return ONLY a valid JSON array of objects matching this schema:
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         'student_duc': 'Trần Đức',
         'student_linh': 'Phạm Linh'
       }
-    student_name = name_map.get(student_id, "Vinschool Student")
+    student_name = name_map.get(student_id, "Math Student")
 
     print(f"Generating review PPTX for {student_name}...")
     slides_data = get_personalized_slides(student_id, lang)

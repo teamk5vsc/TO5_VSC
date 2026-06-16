@@ -89,6 +89,12 @@ export default function StudentPaths({
   // Local Achievement Alert
   const [latestAwardMessage, setLatestAwardMessage] = useState<string | null>(null);
 
+  // Textbook Extractor States
+  const [isTextbookOpen, setIsTextbookOpen] = useState(false);
+  const [textbookContent, setTextbookContent] = useState('');
+  const [isExtractingTextbook, setIsExtractingTextbook] = useState(false);
+  const [textbookError, setTextbookError] = useState('');
+
   // Sync state whenever lesson changes
   useEffect(() => {
     setQuestionIndex(0);
@@ -103,7 +109,50 @@ export default function StudentPaths({
     setReflectionFeedback('');
     setIsGrading(false);
     setActivePhase('explore');
+    setIsTextbookOpen(false);
+    setTextbookContent('');
+    setTextbookError('');
   }, [activeLessonId]);
+
+  const handleOpenTextbook = async () => {
+    setIsTextbookOpen(true);
+    if (textbookContent && textbookContent.includes(`<!-- ${activeLessonId} -->`)) {
+      return;
+    }
+
+    setIsExtractingTextbook(true);
+    setTextbookError('');
+    try {
+      const apiKey = localStorage.getItem('gemini_api_key') || '';
+      const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
+
+      const response = await fetch('/api/textbook/extract', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'x-gemini-model': selectedModel
+        },
+        body: JSON.stringify({
+          lessonId: activeLessonId,
+          lang: language
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to extract textbook content");
+      }
+
+      const data = await response.json();
+      setTextbookContent(`<!-- ${activeLessonId} -->\n${data.text}`);
+    } catch (err: any) {
+      console.error(err);
+      setTextbookError(err.message || 'Unknown error');
+    } finally {
+      setIsExtractingTextbook(false);
+    }
+  };
 
   const executeAnswerEvaluation = (submittedAns: string) => {
     if (!submittedAns.trim()) return;
@@ -462,7 +511,7 @@ export default function StudentPaths({
                 {language === 'vi' ? 'Hạt nhân Lộ trình học' : 'Curriculum Pathway'}
               </h3>
               <p className="text-xs text-slate-500">
-                {language === 'vi' ? 'Giáo trình chuẩn Cambridge kết hợp Vinschool' : 'Cambridge CAIE & Vinschool Standards'}
+                {language === 'vi' ? 'Giáo trình chuẩn Cambridge' : 'Cambridge CAIE Standards'}
               </p>
             </div>
 
@@ -555,43 +604,66 @@ export default function StudentPaths({
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activeLesson.code} • Lesson Course</p>
                 <h2 className="text-lg font-bold text-slate-900 sm:text-xl font-display">{getLangText(activeLesson.title)}</h2>
               </div>
-              <div className="mt-3 flex items-center gap-1.5 md:mt-0">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 md:mt-0">
+                <button
+                  type="button"
+                  onClick={handleOpenTextbook}
+                  className="rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-1 text-[10px] font-bold text-emerald-700 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>📚 {language === 'vi' ? 'Đọc Sách Giáo Khoa' : 'Read Textbook'}</span>
+                </button>
                 <span className="rounded-full bg-blue-100/70 border border-blue-200 px-3.5 py-1 text-[10px] font-bold text-blue-700">
                   Cambridge Core
                 </span>
                 <span className="rounded-full bg-red-100/70 border border-red-200 px-3.5 py-1 text-[10px] font-bold text-red-700">
-                  Vinschool Math Map
+                  Cambridge Math Map
                 </span>
               </div>
             </div>
 
-            {/* Stepper Phase selector */}
-            <nav className="mb-6 flex overflow-x-auto rounded-xl bg-slate-100 p-1 font-display text-xs" id="lesson_stepper_strip">
-              {(['explore', 'learn', 'example', 'practice', 'reflection'] as const).map(phase => {
-                const isActive = activePhase === phase;
-                const labelMap = {
-                  explore: language === 'vi' ? '1. Khám phá' : '1. Explore',
-                  learn: language === 'vi' ? '2. Kiến thức' : '2. Learn',
-                  example: language === 'vi' ? '3. Ví dụ mẫu' : '3. Example',
-                  practice: language === 'vi' ? '4. Luyện tập' : '4. Practice',
-                  reflection: language === 'vi' ? '5. Tự ngẫm' : '5. Reflect'
-                };
+            {/* Stepper Phase selector as a Journey Roadmap */}
+            <div className="mb-8 p-3.5 rounded-2xl bg-indigo-50/50 border border-indigo-100/60" id="lesson_stepper_strip">
+              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3 text-center">
+                {language === 'vi' ? 'Hành trình chinh phục bài học 🚀' : 'Learning Journey Roadmap 🚀'}
+              </p>
+              <nav className="flex items-center justify-between gap-2 max-w-xl mx-auto text-xs relative px-4">
+                {/* Connector line */}
+                <div className="absolute top-1/2 left-6 right-6 h-1 bg-slate-200 -translate-y-1/2 z-0" />
+                
+                {(['explore', 'learn', 'example', 'practice', 'reflection'] as const).map((phase, idx) => {
+                  const isActive = activePhase === phase;
+                  const labelMap = {
+                    explore: language === 'vi' ? 'Khám phá 🔍' : 'Explore 🔍',
+                    learn: language === 'vi' ? 'Bài học 📖' : 'Theory 📖',
+                    example: language === 'vi' ? 'Ví dụ 💡' : 'Example 💡',
+                    practice: language === 'vi' ? 'Thử thách ⚡' : 'Practice ⚡',
+                    reflection: language === 'vi' ? 'Nhật ký ✍️' : 'Diary ✍️'
+                  };
 
-                return (
-                  <button
-                    key={phase}
-                    onClick={() => setActivePhase(phase)}
-                    className={`flex-1 rounded-lg py-2.5 px-2 text-center font-bold text-[11px] whitespace-nowrap transition-all ${
-                      isActive 
-                        ? 'bg-blue-600 text-white shadow-md' 
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {labelMap[phase]}
-                  </button>
-                );
-              })}
-            </nav>
+                  return (
+                    <button
+                      key={phase}
+                      type="button"
+                      onClick={() => setActivePhase(phase)}
+                      className="relative z-10 flex flex-col items-center gap-1.5 focus:outline-none"
+                    >
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold transition-all shadow-sm border ${
+                        isActive 
+                          ? 'bg-blue-600 text-white border-blue-600 scale-110 ring-4 ring-blue-100' 
+                          : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
+                      }`}>
+                        {idx + 1}
+                      </div>
+                      <span className={`text-[9.5px] sm:text-[10px] font-bold tracking-tight whitespace-nowrap transition-colors ${
+                        isActive ? 'text-blue-650 font-extrabold' : 'text-slate-550'
+                      }`}>
+                        {labelMap[phase]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
 
             {/* SECTION 1: EXPLORE VIEW */}
             {activePhase === 'explore' && (
@@ -721,8 +793,38 @@ export default function StudentPaths({
             {/* SECTION 4: PRACTICE VIEW (QUIZ ENGINE) */}
             {activePhase === 'practice' && (
               <div className="space-y-6" id="practice_view_container">
-                
-                {/* Active Question progress header */}
+                {!activeQuestion ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-4">
+                    <p className="text-xs text-slate-500 font-medium">
+                      {language === 'vi' 
+                        ? 'Bài học này hiện chưa có câu hỏi luyện tập tự động.'
+                        : 'This lesson does not have practice questions yet.'}
+                    </p>
+                    <p className="text-xs text-slate-700 font-bold">
+                      {language === 'vi'
+                        ? 'Em hãy nhấp nút "Đọc Sách Giáo Khoa 📚" ở góc trên bên phải để xem tài liệu tóm tắt kiến thức của bài học nhé!'
+                        : 'Click the "Read Textbook 📚" button in the top right to study the summarized textbook contents!'}
+                    </p>
+                    <div className="flex justify-center pt-2">
+                      <button
+                        onClick={handleOpenTextbook}
+                        className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 flex items-center gap-1.5 shadow-md cursor-pointer"
+                      >
+                        <span>📚 {language === 'vi' ? 'Đọc Sách Giáo Khoa' : 'Read Textbook'}</span>
+                      </button>
+                    </div>
+                    <div className="flex justify-center pt-4">
+                      <button
+                        onClick={() => setActivePhase('reflection')}
+                        className="text-xs text-blue-650 hover:underline font-bold cursor-pointer"
+                      >
+                        {language === 'vi' ? 'Đi thẳng tới phần Nhật ký học tập ✍️' : 'Go directly to Learning Diary ✍️'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Active Question progress header */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="text-xs">
                     <span className="font-bold text-slate-500">{language === 'vi' ? 'Bài tập: ' : 'Question: '}</span>
@@ -849,14 +951,24 @@ export default function StudentPaths({
                         {/* Consult Socratic Coach Option */}
                         <div>
                           {!hasSubmitted ? (
-                            <button
-                              type="button"
-                              onClick={() => setShowHint(!showHint)}
-                              className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
-                            >
-                              <Lightbulb className="h-4.5 w-4.5" />
-                              <span>{showHint ? (language === 'vi' ? 'Ẩn gợi ý toán học' : 'Hide mathematical hint') : (language === 'vi' ? 'Xem gợi ý toán học' : 'Show mathematical hint')}</span>
-                            </button>
+                            <div className="flex flex-wrap items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setShowHint(!showHint)}
+                                className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
+                              >
+                                <Lightbulb className="h-4.5 w-4.5" />
+                                <span>{showHint ? (language === 'vi' ? 'Ẩn gợi ý toán học' : 'Hide mathematical hint') : (language === 'vi' ? 'Xem gợi ý toán học' : 'Show mathematical hint')}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleOpenTextbook}
+                                className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                              >
+                                <BookOpen className="h-4.5 w-4.5" />
+                                <span>{language === 'vi' ? 'Đọc Sách Giáo Khoa 📚' : 'Read Textbook 📚'}</span>
+                              </button>
+                            </div>
                           ) : !isCurrentCorrect ? (
                             <button
                               type="button"
@@ -950,6 +1062,8 @@ export default function StudentPaths({
                     </div>
                   </motion.div>
                 )}
+                  </>
+                )}
 
               </div>
             )}
@@ -959,7 +1073,7 @@ export default function StudentPaths({
               <div className="space-y-6" id="reflection_view_container">
                 <div className="rounded-xl border border-blue-100 bg-blue-50/25 p-5">
                   <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">
-                    {language === 'vi' ? 'Suy ngẫm & Đóng gói kiến thức (Lập luận)' : 'Reflect & Consolidate (Reasoning)'}
+                    {language === 'vi' ? 'Nhật ký Toán học của em ✍️' : 'My Math Diary ✍️'}
                   </p>
                   <p className="text-xs text-slate-700 font-medium leading-relaxed">
                     {getLangText(activeLesson.reflection.prompt)}
@@ -1093,6 +1207,65 @@ export default function StudentPaths({
 
           </div>
         </div>
+
+      {/* Textbook Companion Modal */}
+      {isTextbookOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl flex flex-col max-h-[85vh] relative" role="dialog">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-emerald-600 animate-pulse" />
+                <h3 className="font-display font-bold text-slate-800 text-sm sm:text-base">
+                  {language === 'vi' ? 'Sách Giáo Khoa Thông Minh 📖' : 'Smart Textbook Reference 📖'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsTextbookOpen(false)} 
+                className="text-slate-400 hover:text-slate-650 transition-colors p-1.5 rounded-lg hover:bg-slate-50 border border-slate-200"
+              >
+                <span className="font-bold text-xs">{language === 'vi' ? 'Đóng' : 'Close'}</span>
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-4 text-xs">
+              {isExtractingTextbook ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-3">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent" />
+                  <p className="font-bold text-emerald-700 animate-pulse">
+                    {language === 'vi' ? 'Đang mở sách và trích xuất kiến thức...' : 'Opening textbook and extracting concepts...'}
+                  </p>
+                </div>
+              ) : textbookError ? (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-red-700 font-semibold space-y-2">
+                  <p>{language === 'vi' ? 'Không thể mở sách tự động:' : 'Could not open textbook:'}</p>
+                  <p className="font-mono text-[10.5px] bg-red-100/50 p-2 rounded">{textbookError}</p>
+                  <p className="text-[10px] font-normal leading-relaxed text-red-550">
+                    {language === 'vi' 
+                      ? 'Lưu ý: Hãy chắc chắn em đã nhập API key ở mục thiết lập (nút răng cưa ở thanh tiêu đề).'
+                      : 'Please verify that you have entered your API Key in settings (gear icon on header).'}
+                  </p>
+                </div>
+              ) : (
+                <div className="prose max-w-none text-slate-700 leading-relaxed font-medium whitespace-pre-line bg-slate-50/60 p-4 rounded-xl border border-slate-100">
+                  {textbookContent.replace(/<!--.*?-->\n/, '')}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-slate-100 pt-3 flex justify-end">
+              <button
+                onClick={() => setIsTextbookOpen(false)}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center transition-colors shadow-md"
+              >
+                {language === 'vi' ? 'Đã hiểu!' : 'Got it!'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       </div>
     </div>

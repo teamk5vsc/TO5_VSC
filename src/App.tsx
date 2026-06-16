@@ -171,7 +171,7 @@ function AppContent() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans" id="app_root_viewport">
       
       {/* Upper Architecture Notification Strip */}
-      {showConfigNotice && (
+      {showConfigNotice && currentMode === 'teacher' && (
         <div className="bg-slate-900 text-white border-b border-white/10" id="architectural_banner">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-start sm:items-center gap-2.5">
@@ -252,6 +252,7 @@ function AppContent() {
           <div className="text-left">
             <p className="text-xs font-bold text-slate-700">{t('footerTitle')}</p>
             <p className="text-[10px] text-slate-400 mt-0.5">{t('footerSubtitle')}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Được phát triển bởi Ms.Ngọc Mai</p>
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
             <button

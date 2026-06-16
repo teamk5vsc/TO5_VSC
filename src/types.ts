@@ -20,7 +20,7 @@ export interface Lesson {
   unitId: string;
   title: BilingualOrString;
   code: string; // e.g., "L1"
-  learningObjectives: string[]; // Vinschool mapped objectives
+  learningObjectives: string[]; // Cambridge mapped objectives
   
   // Lesson Stages Content
   explore: {

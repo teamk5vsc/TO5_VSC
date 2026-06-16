@@ -25,11 +25,11 @@ const TRANSLATIONS: TranslationDict = {
   resetPractice: { en: 'Reset Progress', vi: 'Làm mới Luyện tập' },
   coreArchitecture: { en: 'Core Architecture', vi: 'Kiến trúc Core' },
   architectureBannerText: {
-    en: 'Stage 6 Cambridge/Vinschool Math Portal enabled. Content dynamically loaded from parsed textbooks.',
-    vi: 'Cổng Toán học lớp 6 Cambridge/Vinschool đã kích hoạt. Nội dung tải động từ sách giáo khoa.'
+    en: 'Stage 6 Cambridge Math Portal enabled. Content dynamically loaded from parsed textbooks.',
+    vi: 'Cổng Toán học lớp 6 Cambridge đã kích hoạt. Nội dung tải động từ sách giáo khoa.'
   },
   understandBtn: { en: 'I understand', vi: 'Tôi đã hiểu' },
-  footerTitle: { en: 'Math Explorer 6 - Cambridge/Vinschool Portal', vi: 'Math Explorer 6 - Cổng Toán Cambridge/Vinschool' },
+  footerTitle: { en: 'Math Explorer 6 - Cambridge Portal', vi: 'Math Explorer 6 - Cổng Toán Cambridge' },
   footerSubtitle: { en: 'Designed for competency-based diagnostic assessments. Stage 6 compliant.', vi: 'Thiết kế cho đánh giá chẩn đoán theo năng lực. Tuân thủ Stage 6.' },
 
   // Student Paths

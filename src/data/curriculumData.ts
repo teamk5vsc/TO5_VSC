@@ -19,6 +19,30 @@ export const DEMO_UNITS: Unit[] = [
     }
   },
   {
+    id: 'unit_2',
+    code: 'U2',
+    title: {
+      en: 'Unit 2: Numbers and sequences',
+      vi: 'Học phần 2: Số và dãy số'
+    },
+    description: {
+      en: 'Counting and sequences, special numbers, prime numbers, squares, common multiples and factors.',
+      vi: 'Phép đếm và dãy số, số đặc biệt, số nguyên tố, số chính phương, bội chung và ước chung.'
+    }
+  },
+  {
+    id: 'unit_3',
+    code: 'U3',
+    title: {
+      en: 'Unit 3: Addition and subtraction (1)',
+      vi: 'Học phần 3: Phép cộng và phép trừ (1)'
+    },
+    description: {
+      en: 'Positive and negative integers, using letters to represent numbers.',
+      vi: 'Số nguyên dương và số nguyên âm, dùng các chữ cái để biểu diễn các số.'
+    }
+  },
+  {
     id: 'unit_4',
     code: 'U4',
     title: {
@@ -28,6 +52,78 @@ export const DEMO_UNITS: Unit[] = [
     description: {
       en: 'Deep dive into equivalent fractions, comparing fractions, and converting fractions to percentages.',
       vi: 'Hiểu sâu về phân số bằng nhau, so sánh phân số và chuyển đổi phân số sang tỉ số phần trăm.'
+    }
+  },
+  {
+    id: 'unit_5',
+    code: 'U5',
+    title: {
+      en: 'Unit 5: Addition and subtraction (2)',
+      vi: 'Học phần 5: Phép cộng và phép trừ (2)'
+    },
+    description: {
+      en: 'Adding and subtracting decimal numbers and fractions with different denominators.',
+      vi: 'Cộng và trừ các số thập phân và phân số khác mẫu số.'
+    }
+  },
+  {
+    id: 'unit_6',
+    code: 'U6',
+    title: {
+      en: 'Unit 6: 2D shapes',
+      vi: 'Học phần 6: Hình 2D'
+    },
+    description: {
+      en: 'Quadrilaterals properties, circles (center, radius, diameter), and rotational symmetry.',
+      vi: 'Thuộc tính hình tứ giác, hình tròn (tâm, bán kính, đường kính) và đối xứng quay.'
+    }
+  },
+  {
+    id: 'unit_7',
+    code: 'U7',
+    title: {
+      en: 'Unit 7: Exploring measures',
+      vi: 'Học phần 7: Khám phá các đơn vị đo lường'
+    },
+    description: {
+      en: 'Area and perimeter of rectangles and triangles, 24-hour clock and time zones.',
+      vi: 'Diện tích và chu vi hình chữ nhật và hình tam giác, đồng hồ 24 giờ và múi giờ.'
+    }
+  },
+  {
+    id: 'unit_8',
+    code: 'U8',
+    title: {
+      en: 'Unit 8: Averages',
+      vi: 'Học phần 8: Các giá trị trung bình'
+    },
+    description: {
+      en: 'Mode, median, mean, and range statistics.',
+      vi: 'Tìm mốt, trung vị, số trung bình cộng và khoảng biến thiên.'
+    }
+  },
+  {
+    id: 'unit_9',
+    code: 'U9',
+    title: {
+      en: 'Unit 9: Probability',
+      vi: 'Học phần 9: Xác suất'
+    },
+    description: {
+      en: 'Describing and predicting likelihood using probability scales.',
+      vi: 'Mô tả và dự đoán khả năng sử dụng thang đo xác suất.'
+    }
+  },
+  {
+    id: 'unit_10',
+    code: 'U10',
+    title: {
+      en: 'Unit 10: Multiplication and division (1)',
+      vi: 'Học phần 10: Phép nhân và phép chia (1)'
+    },
+    description: {
+      en: 'Multiplying multi-digit numbers, division with remainders, and tests of divisibility.',
+      vi: 'Nhân số có nhiều chữ số, phép chia có dư và dấu hiệu chia hết.'
     }
   },
   {
@@ -43,6 +139,54 @@ export const DEMO_UNITS: Unit[] = [
     }
   },
   {
+    id: 'unit_12',
+    code: 'U12',
+    title: {
+      en: 'Unit 12: Multiplication and division (2)',
+      vi: 'Học phần 12: Phép nhân và phép chia (2)'
+    },
+    description: {
+      en: 'Multiplying and dividing fractions and decimals by integers.',
+      vi: 'Nhân và chia phân số cũng như số thập phân với số tự nhiên.'
+    }
+  },
+  {
+    id: 'unit_13',
+    code: 'U13',
+    title: {
+      en: 'Unit 13: The laws of arithmetic',
+      vi: 'Học phần 13: Các tính chất số học'
+    },
+    description: {
+      en: 'Order of operations, brackets, commutative, associative, and distributive laws.',
+      vi: 'Thứ tự thực hiện phép tính, dấu ngoặc, tính chất giao hoán, kết hợp và phân phối.'
+    }
+  },
+  {
+    id: 'unit_14',
+    code: 'U14',
+    title: {
+      en: 'Unit 14: 3D shapes',
+      vi: 'Học phần 14: Hình 3D'
+    },
+    description: {
+      en: 'Nets of 3D shapes, capacity and volume calculations.',
+      vi: 'Hình trải phẳng của hình 3D, tính toán dung tích và thể tích.'
+    }
+  },
+  {
+    id: 'unit_15',
+    code: 'U15',
+    title: {
+      en: 'Unit 15: Angles',
+      vi: 'Học phần 15: Góc'
+    },
+    description: {
+      en: 'Measuring and drawing reflex angles, sum of angles in a triangle.',
+      vi: 'Đo và vẽ góc reflex, tổng các góc trong một tam giác.'
+    }
+  },
+  {
     id: 'unit_16',
     code: 'U16',
     title: {
@@ -52,6 +196,18 @@ export const DEMO_UNITS: Unit[] = [
     description: {
       en: 'Explore translation vectors, reflection axes, rotation degrees, and rotational symmetry.',
       vi: 'Khám phá vectơ tịnh tiến, trục đối xứng, góc quay và đối xứng quay hình học.'
+    }
+  },
+  {
+    id: 'unit_17',
+    code: 'U17',
+    title: {
+      en: 'Unit 17: Data',
+      vi: 'Học phần 17: Dữ liệu'
+    },
+    description: {
+      en: 'Bar charts, dot plots, pie charts, waffle diagrams, and frequency diagrams.',
+      vi: 'Biểu đồ cột, đồ thị điểm, biểu đồ tròn, biểu đồ waffle và biểu đồ tần số.'
     }
   }
 ];
@@ -715,6 +871,705 @@ export const DEMO_LESSONS: Lesson[] = [
           en: 'How does line symmetry differ from rotational symmetry in a regular shape?',
           vi: 'Đối xứng trục khác với đối xứng quay thế nào trong một hình đều?'
         }
+      ]
+    }
+  },
+  {
+    id: 'lesson_8',
+    unitId: 'unit_2',
+    title: {
+      en: 'Counting and Sequences',
+      vi: 'Phép đếm và dãy số'
+    },
+    code: 'L8',
+    learningObjectives: ['6Npv.03 - Count on and back in steps of constant size, including decimals.', 'VSE.06.03 - Thực hiện đếm tiến và đếm lùi theo các bước nhảy đều.'],
+    explore: {
+      scenario: {
+        en: 'A sequence starts at 1.5 and increases by 0.25 each time.',
+        vi: 'Một dãy số bắt đầu từ 1,5 và tăng thêm 0,25 sau mỗi bước.'
+      },
+      question: {
+        en: 'What are the next three terms of the sequence?',
+        vi: 'Ba số tiếp theo của dãy số này là các số nào?'
+      },
+      initialHint: {
+        en: 'Add 0.25 to the current number to find the next term.',
+        vi: 'Cộng thêm 0,25 vào số hiện tại để tìm số hạng tiếp theo.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'A sequence is a list of numbers in order. The difference between terms is called the term-to-term rule.',
+        vi: 'Dãy số là danh sách các số xếp theo thứ tự. Chênh lệch giữa các số hạng được gọi là quy luật giữa các số.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find the next term in: 2.4, 2.7, 3.0, ...',
+        vi: 'Tìm số hạng tiếp theo trong dãy: 2,4; 2,7; 3,0; ...'
+      },
+      steps: [
+        {
+          title: { en: 'Find difference', vi: 'Tìm khoảng chênh lệch' },
+          description: { en: 'Subtract: 2.7 - 2.4 = 0.3.', vi: 'Tính: 2,7 - 2,4 = 0,3.' }
+        },
+        {
+          title: { en: 'Apply rule', vi: 'Áp dụng quy luật' },
+          description: { en: 'Add 0.3 to 3.0.', vi: 'Cộng thêm 0,3 vào 3,0.' },
+          mathExpression: '3.0 + 0.3 = 3.3'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on sequences:', vi: 'Suy nghĩ về dãy số:' },
+      guidingQuestions: [
+        { en: 'How do you check if a sequence is increasing or decreasing?', vi: 'Làm thế nào để kiểm tra một dãy số đang tăng hay giảm?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_9',
+    unitId: 'unit_2',
+    title: {
+      en: 'Special Numbers',
+      vi: 'Các loại số đặc biệt'
+    },
+    code: 'L9',
+    learningObjectives: ['6Npv.04 - Recognize prime, square, and cube numbers.', 'VSE.06.04 - Nhận biết số nguyên tố, số chính phương và số lập phương.'],
+    explore: {
+      scenario: {
+        en: 'We want to arrange 25 square tiles into a perfect square grid.',
+        vi: 'Chúng ta muốn sắp xếp 25 ô vuông thành một mạng lưới hình vuông hoàn hảo.'
+      },
+      question: {
+        en: 'Why is 25 called a square number? What about 27?',
+        vi: 'Tại sao 25 được gọi là số chính phương? Còn 27 thì sao?'
+      },
+      initialHint: {
+        en: 'A square number is the result of multiplying an integer by itself.',
+        vi: 'Số chính phương là kết quả của việc nhân một số nguyên với chính nó.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Square numbers are created by multiplying a number by itself ($n^2$). Cube numbers are multiplied three times ($n^3$). Prime numbers have only two factors.',
+        vi: 'Số chính phương tạo ra từ tích của một số với chính nó ($n^2$). Số lập phương được nhân 3 lần ($n^3$). Số nguyên tố chỉ có 2 ước.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find the first three square numbers.',
+        vi: 'Tìm ba số chính phương đầu tiên.'
+      },
+      steps: [
+        {
+          title: { en: 'Calculate squares', vi: 'Tính bình phương' },
+          description: { en: 'Calculate 1x1, 2x2, 3x3.', vi: 'Tính 1x1, 2x2, 3x3.' },
+          mathExpression: '1^2=1, 2^2=4, 3^2=9'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on special numbers:', vi: 'Suy nghĩ về các loại số đặc biệt:' },
+      guidingQuestions: [
+        { en: 'Why is 1 not considered a prime number?', vi: 'Tại sao số 1 không được coi là số nguyên tố?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_10',
+    unitId: 'unit_3',
+    title: {
+      en: 'Positive and Negative Integers',
+      vi: 'Số nguyên dương và số nguyên âm'
+    },
+    code: 'L10',
+    learningObjectives: ['6Npv.05 - Understand negative numbers in real-world contexts.', 'VSE.06.05 - Nhận biết và sử dụng số nguyên âm trong thực tế.'],
+    explore: {
+      scenario: {
+        en: 'The temperature in London is 3°C, but in Ottawa it is -5°C.',
+        vi: 'Nhiệt độ ở London là 3°C, nhưng ở Ottawa là -5°C.'
+      },
+      question: {
+        en: 'Which city is colder and by how many degrees?',
+        vi: 'Thành phố nào lạnh hơn và lạnh hơn bao nhiêu độ?'
+      },
+      initialHint: {
+        en: 'Use a number line to find the difference between 3 and -5.',
+        vi: 'Sử dụng trục số để tìm khoảng cách giữa 3 và -5.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Negative numbers are numbers below zero. They are written with a minus sign.',
+        vi: 'Số nguyên âm là số nhỏ hơn không. Chúng được viết kèm dấu trừ ở phía trước.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Calculate the difference between 5 and -2.',
+        vi: 'Tính khoảng cách giữa 5 và -2.'
+      },
+      steps: [
+        {
+          title: { en: 'Count on grid', vi: 'Đếm trên trục số' },
+          description: { en: 'Count steps from -2 to 5.', vi: 'Đếm số bước từ -2 đến 5.' },
+          mathExpression: '5 - (-2) = 7'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on negative numbers:', vi: 'Suy nghĩ về số nguyên âm:' },
+      guidingQuestions: [
+        { en: 'Where do we see negative numbers in everyday life?', vi: 'Chúng ta thấy số nguyên âm ở đâu trong cuộc sống hàng ngày?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_11',
+    unitId: 'unit_5',
+    title: {
+      en: 'Adding and Subtracting Decimals',
+      vi: 'Cộng và trừ các số thập phân'
+    },
+    code: 'L11',
+    learningObjectives: ['6Npv.06 - Add and subtract decimals with up to 3 places.', 'VSE.06.06 - Cộng và trừ số thập phân có đến 3 chữ số thập phân.'],
+    explore: {
+      scenario: {
+        en: 'An athlete jumps 5.24 meters, then improves by 0.385 meters.',
+        vi: 'Một vận động viên nhảy xa được 5,24 mét, sau đó cải thiện thêm 0,385 mét.'
+      },
+      question: {
+        en: 'What is the length of the second jump?',
+        vi: 'Chiều dài của lần nhảy thứ hai là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'Align the decimal points vertically before adding.',
+        vi: 'Đặt dấu phẩy thẳng hàng dọc trước khi thực hiện phép tính.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Always line up the decimal points and add trailing zeros if needed to match places.',
+        vi: 'Luôn đặt các dấu phẩy thẳng hàng và thêm các số 0 ở cuối nếu cần để khớp số chữ số thập phân.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Calculate 3.45 + 1.286',
+        vi: 'Tính 3,45 + 1,286'
+      },
+      steps: [
+        {
+          title: { en: 'Align place value', vi: 'Đặt thẳng hàng' },
+          description: { en: 'Align 3.450 and 1.286.', vi: 'Đặt thẳng hàng 3,450 và 1,286.' },
+          mathExpression: '3.450 + 1.286 = 4.736'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on decimal addition:', vi: 'Suy nghĩ về cộng số thập phân:' },
+      guidingQuestions: [
+        { en: 'Why is vertical alignment of decimal points crucial?', vi: 'Tại sao việc đặt thẳng hàng dấu phẩy lại vô cùng quan trọng?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_12',
+    unitId: 'unit_6',
+    title: {
+      en: 'Quadrilaterals and Circles',
+      vi: 'Hình tứ giác và hình tròn'
+    },
+    code: 'L12',
+    learningObjectives: ['6Gg.02 - Identify quadrilaterals and parts of a circle.', 'VSE.06.12 - Nhận biết đặc điểm tứ giác và các thành phần hình tròn.'],
+    explore: {
+      scenario: {
+        en: 'A wheel has a radius of 15 cm.',
+        vi: 'Một chiếc bánh xe có bán kính là 15 cm.'
+      },
+      question: {
+        en: 'What is the diameter of this wheel?',
+        vi: 'Đường kính của chiếc bánh xe này là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'The diameter of a circle is twice its radius.',
+        vi: 'Đường kính của hình tròn luôn gấp đôi bán kính của nó.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Quadrilaterals include trapeziums and rhombuses. Circles consist of center, radius, diameter, and circumference.',
+        vi: 'Hình tứ giác gồm hình thang, hình thoi. Đường tròn gồm tâm, bán kính, đường kính và chu vi.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Calculate diameter if radius is 7 cm.',
+        vi: 'Tính đường kính nếu bán kính là 7 cm.'
+      },
+      steps: [
+        {
+          title: { en: 'Multiply radius', vi: 'Nhân bán kính với 2' },
+          description: { en: 'Use formula: d = 2 * r.', vi: 'Áp dụng công thức: d = 2 * r.' },
+          mathExpression: '7 \\times 2 = 14 \\text{ cm}'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on quadrilaterals:', vi: 'Suy nghĩ về hình tròn và tứ giác:' },
+      guidingQuestions: [
+        { en: 'What is the relation between diameter and radius?', vi: 'Mối quan hệ giữa đường kính và bán kính là gì?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_13',
+    unitId: 'unit_7',
+    title: {
+      en: 'Exploring Measures',
+      vi: 'Khám phá đơn vị đo lường'
+    },
+    code: 'L13',
+    learningObjectives: ['6Gg.03 - Calculate perimeter and area of rectangles.', 'VSE.06.13 - Tính chu vi và diện tích hình chữ nhật.'],
+    explore: {
+      scenario: {
+        en: 'A football field is 100 meters long and 60 meters wide.',
+        vi: 'Một sân bóng đá có chiều dài 100 mét và chiều rộng 60 mét.'
+      },
+      question: {
+        en: 'What is the area and perimeter of the football field?',
+        vi: 'Diện tích và chu vi của sân bóng đá đó là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'Area = length * width. Perimeter = 2 * (length + width).',
+        vi: 'Diện tích = dài * rộng. Chu vi = 2 * (dài + rộng).'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Perimeter is the boundary distance. Area is the 2D space inside the boundary.',
+        vi: 'Chu vi là độ dài đường biên. Diện tích là không gian phẳng bên trong đường biên.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find area of 8m by 5m rectangle.',
+        vi: 'Tìm diện tích hình chữ nhật kích thước 8m x 5m.'
+      },
+      steps: [
+        {
+          title: { en: 'Apply Area formula', vi: 'Tính diện tích' },
+          description: { en: 'Multiply 8 by 5.', vi: 'Nhân 8 với 5.' },
+          mathExpression: '8 \\times 5 = 40 \\text{ m}^2'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on area calculations:', vi: 'Suy nghĩ về đo lường:' },
+      guidingQuestions: [
+        { en: 'How do perimeter and area units differ?', vi: 'Đơn vị đo chu vi và diện tích khác nhau thế nào?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_14',
+    unitId: 'unit_8',
+    title: {
+      en: 'Mode, Median, Mean and Range',
+      vi: 'Số trung bình, Trung vị, Mốt và Khoảng biến thiên'
+    },
+    code: 'L14',
+    learningObjectives: ['6Gg.04 - Calculate averages from a set of data.', 'VSE.06.14 - Tính số trung bình cộng, mốt, trung vị của dãy số liệu.'],
+    explore: {
+      scenario: {
+        en: 'Scores of 5 math quizzes: 8, 9, 7, 9, 10.',
+        vi: 'Điểm số của 5 bài kiểm tra toán: 8, 9, 7, 9, 10.'
+      },
+      question: {
+        en: 'What is the average (mean) score of these quizzes?',
+        vi: 'Điểm số trung bình (mean) của các bài kiểm tra này là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'Sum all numbers and divide by 5.',
+        vi: 'Cộng tất cả các số lại rồi chia cho 5.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Mean is the sum divided by count. Mode is the most frequent. Median is the middle number.',
+        vi: 'Số trung bình bằng tổng chia cho số lượng. Mốt là số xuất hiện nhiều nhất. Trung vị là số ở giữa.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find mean of 4, 6, 8.',
+        vi: 'Tìm số trung bình của 4, 6, 8.'
+      },
+      steps: [
+        {
+          title: { en: 'Calculate mean', vi: 'Tính trung bình' },
+          description: { en: 'Sum = 18, count = 3.', vi: 'Tổng = 18, số lượng = 3.' },
+          mathExpression: '(4+6+8) \\div 3 = 6'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on statistics:', vi: 'Suy nghĩ về thống kê:' },
+      guidingQuestions: [
+        { en: 'When is median more useful than mean?', vi: 'Khi nào trung vị hữu ích hơn số trung bình?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_15',
+    unitId: 'unit_9',
+    title: {
+      en: 'Probability Scales',
+      vi: 'Thang đo xác suất'
+    },
+    code: 'L15',
+    learningObjectives: ['6Npv.07 - Describe probability on a 0 to 1 scale.', 'VSE.06.07 - Mô tả khả năng xảy ra sự kiện trên thang xác suất.'],
+    explore: {
+      scenario: {
+        en: 'A bag has 3 red marbles and 7 blue marbles.',
+        vi: 'Một chiếc túi có 3 viên bi đỏ và 7 viên bi xanh.'
+      },
+      question: {
+        en: 'What is the likelihood of drawing a red marble?',
+        vi: 'Khả năng bốc được một viên bi đỏ là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'The fraction of red marbles is 3 out of 10, or 30%.',
+        vi: 'Tỉ số bi đỏ là 3 trên tổng số 10 viên, tức 30%.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Probability measures likelihood from 0 (impossible) to 1 (certain).',
+        vi: 'Xác suất đo lường khả năng xảy ra từ 0 (không thể) đến 1 (chắc chắn).'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find probability of picking red from 2 red, 3 blue.',
+        vi: 'Tìm xác suất chọn được bi đỏ từ giỏ có 2 bi đỏ, 3 bi xanh.'
+      },
+      steps: [
+        {
+          title: { en: 'Divide count', vi: 'Tính tỉ số' },
+          description: { en: 'Red count = 2, total = 5.', vi: 'Số bi đỏ = 2, tổng số bi = 5.' },
+          mathExpression: 'P = \\frac{2}{5} = 0.4'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on probability:', vi: 'Suy nghĩ về xác suất:' },
+      guidingQuestions: [
+        { en: 'What does a probability of 0.5 mean?', vi: 'Xác suất 0,5 có nghĩa là gì?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_16',
+    unitId: 'unit_10',
+    title: {
+      en: 'Multiplication and Division',
+      vi: 'Phép nhân và phép chia nâng cao'
+    },
+    code: 'L16',
+    learningObjectives: ['6Npv.08 - Perform multi-digit multiplication and division.', 'VSE.06.08 - Thực hiện phép nhân và phép chia số lớn.'],
+    explore: {
+      scenario: {
+        en: 'A school orders 125 boxes of crayons, each containing 24 crayons.',
+        vi: 'Trường học đặt 125 hộp bút màu, mỗi hộp có 24 chiếc bút.'
+      },
+      question: {
+        en: 'How many total crayons are ordered?',
+        vi: 'Tổng số bút màu được đặt là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'Multiply 125 by 24 using the vertical method.',
+        vi: 'Nhân 125 với 24 bằng phương pháp nhân cột dọc.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Multi-digit multiplication can be done using long multiplication or grid method.',
+        vi: 'Phép nhân số lớn có thể thực hiện bằng cách đặt tính rồi tính cột dọc.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Calculate 125 x 24',
+        vi: 'Tính 125 x 24'
+      },
+      steps: [
+        {
+          title: { en: 'Long multiplication', vi: 'Đặt tính' },
+          description: { en: 'Multiply 125 by 20 and 125 by 4, then add.', vi: 'Nhân 125 với 20 và 125 với 4, rồi cộng lại.' },
+          mathExpression: '125 \\times 24 = 3000'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on multiplication:', vi: 'Suy nghĩ về phép nhân chia:' },
+      guidingQuestions: [
+        { en: 'How do you check division using multiplication?', vi: 'Làm thế nào để soát lại phép chia bằng phép nhân?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_17',
+    unitId: 'unit_12',
+    title: {
+      en: 'Multiplying and Dividing Fractions',
+      vi: 'Nhân và chia phân số'
+    },
+    code: 'L17',
+    learningObjectives: ['6Fr.03 - Multiply and divide simple fractions.', 'VSE.06.13 - Thực hiện phép nhân và phép chia phân số đơn giản.'],
+    explore: {
+      scenario: {
+        en: 'A recipe calls for 3/4 cup of sugar. We want to make 1/2 of the recipe.',
+        vi: 'Công thức nấu ăn cần 3/4 cốc đường. Chúng ta muốn làm một nửa công thức đó.'
+      },
+      question: {
+        en: 'How much sugar is needed?',
+        vi: 'Cần bao nhiêu cốc đường?'
+      },
+      initialHint: {
+        en: 'Multiply 3/4 by 1/2.',
+        vi: 'Nhân 3/4 với 1/2.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'To multiply fractions: multiply numerators, multiply denominators. To divide: multiply by the reciprocal.',
+        vi: 'Để nhân phân số: nhân tử với tử, mẫu với mẫu. Để chia: nhân đảo ngược.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Multiply 2/3 by 4/5',
+        vi: 'Nhân 2/3 với 4/5'
+      },
+      steps: [
+        {
+          title: { en: 'Multiply parts', vi: 'Thực hiện nhân' },
+          description: { en: 'Multiply 2x4 and 3x5.', vi: 'Lấy 2x4 và 3x5.' },
+          mathExpression: '\\frac{2}{3} \\times \\frac{4}{5} = \\frac{8}{15}'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on fraction multiplication:', vi: 'Suy nghĩ về nhân chia phân số:' },
+      guidingQuestions: [
+        { en: 'Why is the product of two proper fractions smaller than either fraction?', vi: 'Tại sao tích của hai phân số thực sự lại nhỏ hơn cả hai phân số đó?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_18',
+    unitId: 'unit_13',
+    title: {
+      en: 'The Laws of Arithmetic',
+      vi: 'Các tính chất số học'
+    },
+    code: 'L18',
+    learningObjectives: ['6Npv.09 - Understand brackets and order of operations.', 'VSE.06.09 - Hiểu thứ tự phép tính và vai trò dấu ngoặc.'],
+    explore: {
+      scenario: {
+        en: 'Calculate: 5 + 3 x 2.',
+        vi: 'Tính: 5 + 3 x 2.'
+      },
+      question: {
+        en: 'Do we add first or multiply first? Why?',
+        vi: 'Chúng ta thực hiện phép cộng trước hay phép nhân trước? Tại sao?'
+      },
+      initialHint: {
+        en: 'Multiplication always takes precedence over addition.',
+        vi: 'Phép nhân luôn được ưu tiên thực hiện trước phép cộng.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Order of operations: Brackets first, then Multiplication/Division, then Addition/Subtraction.',
+        vi: 'Thứ tự thực hiện: Dấu ngoặc trước, đến Nhân/Chia, rồi đến Cộng/Trừ.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Calculate (5 + 3) x 2',
+        vi: 'Tính (5 + 3) x 2'
+      },
+      steps: [
+        {
+          title: { en: 'Evaluate brackets', vi: 'Tính trong ngoặc' },
+          description: { en: 'Add 5 and 3.', vi: 'Cộng 5 và 3.' },
+          mathExpression: '5 + 3 = 8'
+        },
+        {
+          title: { en: 'Multiply result', vi: 'Nhân kết quả' },
+          description: { en: 'Multiply 8 by 2.', vi: 'Nhân 8 với 2.' },
+          mathExpression: '8 \\times 2 = 16'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on operations order:', vi: 'Suy nghĩ về thứ tự phép tính:' },
+      guidingQuestions: [
+        { en: 'How do brackets change the order of calculation?', vi: 'Dấu ngoặc thay đổi thứ tự tính toán như thế nào?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_19',
+    unitId: 'unit_14',
+    title: {
+      en: '3D Shapes and Nets',
+      vi: 'Hình 3D và hình trải phẳng'
+    },
+    code: 'L19',
+    learningObjectives: ['6Gg.05 - Identify 3D shapes from their 2D nets.', 'VSE.06.15 - Nhận biết hình 3D từ các hình phẳng trải ra.'],
+    explore: {
+      scenario: {
+        en: 'We want to fold a cardboard sheet into a cube.',
+        vi: 'Chúng ta muốn gấp một tấm bìa thành hình lập phương.'
+      },
+      question: {
+        en: 'How many square faces are needed in the net?',
+        vi: 'Cần bao nhiêu mặt hình vuông trong hình trải phẳng?'
+      },
+      initialHint: {
+        en: 'A cube has exactly 6 identical square faces.',
+        vi: 'Hình lập phương có đúng 6 mặt hình vuông giống hệt nhau.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'A net is a 2D pattern that can be folded to make a 3D shape.',
+        vi: 'Hình trải phẳng là bản vẽ phẳng 2D có thể gấp lại thành hình khối 3D.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Identify the shape formed by folding a net with 6 identical squares.',
+        vi: 'Xác định hình khối tạo ra khi gấp hình trải phẳng gồm 6 hình vuông bằng nhau.'
+      },
+      steps: [
+        {
+          title: { en: 'Fold faces', vi: 'Gấp các mặt' },
+          description: { en: 'Folding 6 squares creates a Cube.', vi: 'Gấp 6 hình vuông tạo thành Hình lập phương.' }
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on 3D nets:', vi: 'Suy nghĩ về hình trải phẳng:' },
+      guidingQuestions: [
+        { en: 'Can any arrangement of 6 squares make a cube?', vi: 'Có phải bất kỳ sự sắp xếp của 6 hình vuông nào cũng xếp thành hình lập phương?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_20',
+    unitId: 'unit_15',
+    title: {
+      en: 'Angles in a Triangle',
+      vi: 'Các góc trong một tam giác'
+    },
+    code: 'L20',
+    learningObjectives: ['6Gg.06 - Calculate angles in a triangle.', 'VSE.06.16 - Tính các góc chưa biết của một hình tam giác.'],
+    explore: {
+      scenario: {
+        en: 'A triangle has two angles: 50° and 60°.',
+        vi: 'Một hình tam giác có hai góc đo được là 50° và 60°.'
+      },
+      question: {
+        en: 'What is the measure of the third angle?',
+        vi: 'Số đo của góc thứ ba là bao nhiêu?'
+      },
+      initialHint: {
+        en: 'The sum of all angles in any triangle is always 180 degrees.',
+        vi: 'Tổng các góc trong một hình tam giác luôn luôn bằng 180 độ.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Sum of angles in a triangle is 180°. For equilateral triangle, each is 60°.',
+        vi: 'Tổng số đo các góc trong tam giác là 180°. Đối với tam giác đều, mỗi góc bằng 60°.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find the third angle if two angles are 45° and 75°.',
+        vi: 'Tìm góc thứ ba nếu biết hai góc là 45° và 75°.'
+      },
+      steps: [
+        {
+          title: { en: 'Sum current angles', vi: 'Tính tổng góc đã biết' },
+          description: { en: '45 + 75 = 120.', vi: '45 + 75 = 120.' },
+          mathExpression: '45^\\circ + 75^\\circ = 120^\\circ'
+        },
+        {
+          title: { en: 'Subtract from 180', vi: 'Trừ đi từ 180' },
+          description: { en: '180 - 120 = 60.', vi: '180 - 120 = 60.' },
+          mathExpression: '180^\\circ - 120^\\circ = 60^\\circ'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on triangle angles:', vi: 'Suy nghĩ về góc trong tam giác:' },
+      guidingQuestions: [
+        { en: 'Why is it impossible to have a triangle with two right angles?', vi: 'Tại sao không thể vẽ một tam giác có hai góc vuông?' }
+      ]
+    }
+  },
+  {
+    id: 'lesson_21',
+    unitId: 'unit_17',
+    title: {
+      en: 'Frequency Diagrams and Line Graphs',
+      vi: 'Biểu đồ tần số và đồ thị đường'
+    },
+    code: 'L21',
+    learningObjectives: ['6S.01 - Interpret frequency diagrams and line graphs.', 'VSE.06.17 - Đọc và phân tích số liệu trên biểu đồ tần số và biểu đồ đường.'],
+    explore: {
+      scenario: {
+        en: 'A line graph tracks temperatures over a week: 25°C, 26°C, 24°C, 28°C...',
+        vi: 'Một biểu đồ đường theo dõi nhiệt độ trong tuần: 25°C, 26°C, 24°C, 28°C...'
+      },
+      question: {
+        en: 'What does the upward slope represent?',
+        vi: 'Độ dốc đi lên của đường biểu diễn điều gì?'
+      },
+      initialHint: {
+        en: 'An upward line shows that temperature is increasing.',
+        vi: 'Đoạn đường hướng lên trên cho thấy nhiệt độ đang tăng lên.'
+      }
+    },
+    learn: {
+      content: {
+        en: 'Line graphs display data trends over time. Frequency diagrams show distribution.',
+        vi: 'Biểu đồ đường hiển thị xu hướng dữ liệu theo thời gian. Biểu đồ tần số thể hiện phân phối dữ liệu.'
+      }
+    },
+    example: {
+      problem: {
+        en: 'Find temperature change if it goes from 20°C to 25°C.',
+        vi: 'Tìm chênh lệch nhiệt độ khi tăng từ 20°C lên 25°C.'
+      },
+      steps: [
+        {
+          title: { en: 'Calculate difference', vi: 'Tính chênh lệch' },
+          description: { en: 'Subtract: 25 - 20 = 5.', vi: 'Trừ: 25 - 20 = 5.' },
+          mathExpression: '25^\\circ\\text{C} - 20^\\circ\\text{C} = 5^\\circ\\text{C}'
+        }
+      ]
+    },
+    reflection: {
+      prompt: { en: 'Reflect on line graphs:', vi: 'Suy nghĩ về biểu đồ:' },
+      guidingQuestions: [
+        { en: 'What type of data is best shown on a line graph?', vi: 'Loại dữ liệu nào thích hợp biểu diễn trên biểu đồ đường?' }
       ]
     }
   }

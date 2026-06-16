@@ -51,7 +51,7 @@ export default function Navbar({
               Math Explorer <span className="text-blue-600">6</span>
             </h1>
             <p className="text-[10px] font-medium tracking-wide text-slate-400 uppercase">
-              Cambridge & Vinschool Stage 6
+              Cambridge Stage 6
             </p>
           </div>
         </div>
@@ -96,8 +96,8 @@ export default function Navbar({
           {/* Settings Button with API key Warning */}
           <div className="flex items-center gap-2" id="settings_trigger_wrapper">
             {!hasApiKey && (
-              <span className="text-[10px] sm:text-xs font-semibold text-red-600 animate-pulse bg-red-50 border border-red-200 px-2 py-1 rounded-md">
-                {language === 'vi' ? 'Lấy API key để sử dụng app' : 'Get API key to use app'}
+              <span className="text-[10px] sm:text-xs font-bold text-blue-600 animate-pulse bg-blue-50 border border-blue-200 px-2 py-1 rounded-md">
+                {language === 'vi' ? 'Kích hoạt Trợ lý Robot AI 🤖' : 'Activate AI Robot Assistant 🤖'}
               </span>
             )}
             <button
@@ -175,7 +175,7 @@ export default function Navbar({
                 {currentMode === 'student' ? (language === 'vi' ? 'Hoàng Minh (Lớp 6A1)' : 'Hoang Minh (Class 6A1)') : (language === 'vi' ? 'Cô Tuyết Mai' : 'Ms. Tuyet Mai')}
               </p>
               <p className="text-[10px] text-slate-500">
-                {currentMode === 'student' ? 'Vinschool Times City' : 'Lead Teacher'}
+                {currentMode === 'student' ? 'Times City' : 'Lead Teacher'}
               </p>
             </div>
           </div>

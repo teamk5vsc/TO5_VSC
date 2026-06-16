@@ -1,6 +1,6 @@
 {
   "name": "Math Explorer 5",
-  "description": "Math Explorer 5 - Cambridge/Vinschool Learning Platform with Socratic AI Math Coach",
+  "description": "Math Explorer 5 - Cambridge Learning Platform with Socratic AI Math Coach",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

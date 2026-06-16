@@ -35,7 +35,7 @@ interface TeacherMetricsProps {
   mistakes: MistakeLog[];
 }
 
-// Predefined Vinschool class student database for comprehensive diagnostics
+// Predefined class student database for comprehensive diagnostics
 const MOCK_CLASS_STUDENTS: StudentProfile[] = [
   {
     id: 'student_minh',
@@ -173,7 +173,7 @@ export default function TeacherMetrics({ students, attempts, mistakes }: Teacher
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${selectedStudent?.name || 'Vinschool'}_Homework_Worksheet.docx`;
+      a.download = `${selectedStudent?.name || 'MathExplorer'}_Homework_Worksheet.docx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -199,7 +199,7 @@ export default function TeacherMetrics({ students, attempts, mistakes }: Teacher
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${selectedStudent?.name || 'Vinschool'}_Lesson_Review.pptx`;
+      a.download = `${selectedStudent?.name || 'MathExplorer'}_Lesson_Review.pptx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -315,7 +315,7 @@ export default function TeacherMetrics({ students, attempts, mistakes }: Teacher
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('classAccuracy')}</p>
             <h3 className="font-mono text-xl font-bold text-slate-800">{classAccuracy}%</h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">{language === 'vi' ? 'Mục tiêu Vinschool: 80%' : 'Vinschool Target: 80%'}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{language === 'vi' ? 'Mục tiêu chất lượng: 80%' : 'Target Quality: 80%'}</p>
           </div>
         </div>
 
@@ -405,11 +405,11 @@ export default function TeacherMetrics({ students, attempts, mistakes }: Teacher
 
           </div>
 
-          {/* Vinschool Moodle Sync Card */}
+          {/* Moodle Sync Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
             <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <FolderSync className="h-4.5 w-4.5 text-indigo-650" />
-              {language === 'vi' ? 'Tích hợp Vinschool Moodle LMS' : 'Vinschool Moodle LMS Integration'}
+              {language === 'vi' ? 'Tích hợp Moodle LMS' : 'Moodle LMS Integration'}
             </h4>
             <p className="text-[10px] text-slate-500 leading-relaxed">
               {language === 'vi'

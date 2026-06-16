@@ -109,7 +109,7 @@ app.get('/api/health', (req, res) => {
 // Personalized Homework DOCX Export
 app.get('/api/export/docx', (req: express.Request, res: express.Response) => {
   const { studentId = 'student_minh', lang = 'vi', apiKey = '' } = req.query;
-  const fileName = `Vinschool_Homework_${studentId}_${Date.now()}.docx`;
+  const fileName = `MathExplorer_Homework_${studentId}_${Date.now()}.docx`;
   const exportDir = path.join(process.cwd(), 'assets', 'exports');
   const filePath = path.join(exportDir, fileName);
 
@@ -148,7 +148,7 @@ app.get('/api/export/docx', (req: express.Request, res: express.Response) => {
 // Personalized Review Slides PPTX Export
 app.get('/api/export/pptx', (req: express.Request, res: express.Response) => {
   const { studentId = 'student_minh', lang = 'vi', apiKey = '' } = req.query;
-  const fileName = `Vinschool_Review_${studentId}_${Date.now()}.pptx`;
+  const fileName = `MathExplorer_Review_${studentId}_${Date.now()}.pptx`;
   const exportDir = path.join(process.cwd(), 'assets', 'exports');
   const filePath = path.join(exportDir, fileName);
 
@@ -236,7 +236,7 @@ app.post('/api/gemini/grade-reflection', async (req: express.Request, res: expre
 
     // Multi-Agent Gemini Prompt Workflow
     const systemPrompt = `
-    You are a Senior Cambridge Math Educator grading student reflection logs for Grade 6 Vinschool.
+    You are a Senior Cambridge Math Educator grading student reflection logs for Grade 6.
     Evaluate the student's mathematical proof and reasoning.
     Provide a grade: 'Master' (Thành thạo), 'Good' (Khá), or 'Needs Work' (Cần hoàn thiện).
     Also write a warm, encouraging feedback sentence in ${lang === 'vi' ? 'Vietnamese' : 'English'} (max 2 sentences).
@@ -345,7 +345,7 @@ app.post('/api/gemini/tutor', async (req: express.Request, res: express.Response
 
     // Build the Socratic system prompts based on chosen language
     const systemPrompt = chosenLanguage === 'en' ? 
-      `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary / Vinschool Mathematics.
+      `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary Mathematics.
 Your pedagogical philosophy is Socrates' method:
 1. NEVER reveal the final correct answer under any circumstances.
 2. ALWAYS respond warmly and encouragingly in English.
@@ -354,7 +354,7 @@ Your pedagogical philosophy is Socrates' method:
 5. Give clues related to the hint: "${hint}".
 6. Make them verify their calculations. Be concise, friendly, and highly engaging for 11-year-olds. Do not write extremely long explanations. Keep comments down to 3-4 simple sentences maximum per turn.` 
       : 
-      `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary / Vinschool Mathematics.
+      `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary Mathematics.
 Your pedagogical philosophy is Socrates' method:
 1. NEVER reveal the final correct answer under any circumstances.
 2. ALWAYS respond warmly and encouragingly in Vietnamese.
@@ -417,6 +417,208 @@ Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${
     res.status(status).json({
       error: error.message || "Could not request Socratic response"
     });
+  }
+});
+
+const LESSON_PDF_MAPPING: Record<string, { vol: 1 | 2; start: number; end: number; topic: string }> = {
+  lesson_1: { vol: 1, start: 49, end: 62, topic: "Place value tenths, hundredths, thousandths" },
+  lesson_2: { vol: 1, start: 36, end: 48, topic: "Rounding decimals" },
+  lesson_3: { vol: 1, start: 63, end: 83, topic: "Equivalent fractions and comparing fractions" },
+  lesson_4: { vol: 1, start: 84, end: 97, topic: "Fractions, decimals and percentages" },
+  lesson_5: { vol: 2, start: 164, end: 175, topic: "Ratio and proportion" },
+  lesson_6: { vol: 2, start: 229, end: 252, topic: "Coordinate transformations, tịnh tiến, đối xứng, quay" },
+  lesson_7: { vol: 2, start: 223, end: 228, topic: "Rotational symmetry, đối xứng quay" },
+  lesson_8: { vol: 1, start: 10, end: 19, topic: "Counting and sequences, phép đếm và dãy số" },
+  lesson_9: { vol: 1, start: 20, end: 35, topic: "Special numbers, prime numbers, squares, cubes" },
+  lesson_10: { vol: 2, start: 133, end: 146, topic: "Positive and negative integers, số nguyên âm" },
+  lesson_11: { vol: 1, start: 114, end: 122, topic: "Adding and subtracting decimals, cộng trừ số thập phân" },
+  lesson_12: { vol: 2, start: 147, end: 163, topic: "Quadrilaterals and circles, hình tứ giác và hình tròn" },
+  lesson_13: { vol: 1, start: 98, end: 113, topic: "Exploring measures, rectangles area and time" },
+  lesson_14: { vol: 1, start: 123, end: 132, topic: "Mode, median, mean and range statistics" },
+  lesson_15: { vol: 1, start: 123, end: 132, topic: "Probability scales, mô tả và dự đoán xác suất" },
+  lesson_16: { vol: 2, start: 133, end: 146, topic: "Multiplication and division, phép nhân và phép chia" },
+  lesson_17: { vol: 2, start: 191, end: 202, topic: "Multiplying and dividing fractions and decimals" },
+  lesson_18: { vol: 2, start: 223, end: 228, topic: "The laws of arithmetic, các tính chất số học" },
+  lesson_19: { vol: 2, start: 147, end: 163, topic: "3D shapes and nets, hình trải phẳng của hình khối" },
+  lesson_20: { vol: 2, start: 176, end: 190, topic: "Angles in a triangle, đo và tính các góc" },
+  lesson_21: { vol: 2, start: 203, end: 222, topic: "Frequency diagrams, line graphs and data" }
+};
+
+// AI Textbook Extractor endpoint
+app.post('/api/textbook/extract', async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { lessonId, lang = 'vi' } = req.body;
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+
+    const mapping = LESSON_PDF_MAPPING[lessonId];
+    if (!mapping) {
+      res.status(400).json({ error: "Invalid lessonId or no mapping found" });
+      return;
+    }
+
+    const pdfName = mapping.vol === 1 ? "Stage 6_LB_Vol 1 (1).pdf" : "Stage 6_LB_Vol 2.pdf";
+    const pdfPath = path.join(process.cwd(), pdfName);
+
+    const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
+    const command = `"${uvPath}" run extract_pages.py "${pdfPath}" ${mapping.start} ${mapping.end}`;
+
+    console.log(`[Textbook Extract] Executing: ${command}`);
+
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[Textbook Extract] Error: ${error.message}`);
+        res.status(500).json({ error: "Failed to extract PDF contents", details: error.message });
+        return;
+      }
+
+      const ai = createDynamicClient(apiKeyHeader);
+      if (!ai) {
+        const mockSummary = lang === 'vi'
+          ? `### 📚 TÀI LIỆU SÁCH GIÁO KHOA (${mapping.topic})
+          
+*Đang chạy ở chế độ ngoại tuyến.*
+
+**Dải trang gốc:** Sách Học Sinh Tập ${mapping.vol}, trang ${mapping.start} - ${mapping.end}.
+
+**Nội dung thô trích xuất:**
+${stdout.slice(0, 1000)}...`
+          : `### 📚 TEXTBOOK REFERENCE (Chapter: ${mapping.topic})
+
+*Running in offline mode.*
+
+**Original page range:** Learner's Book Vol ${mapping.vol}, pages ${mapping.start} - ${mapping.end}.
+
+**Extracted raw text snippet:**
+${stdout.slice(0, 1000)}...`;
+
+        res.json({ text: mockSummary, rawText: stdout });
+        return;
+      }
+
+      const systemPrompt = `
+      You are a friendly Grade 6 Math Coach. 
+      Below is raw text extracted from the Cambridge Primary Mathematics Stage 6 Learner's Book for the topic: "${mapping.topic}".
+      Please write a highly structured, kid-friendly study guide (tờ tóm tắt kiến thức) in ${lang === 'vi' ? 'Vietnamese' : 'English'} based on this textbook content.
+      
+      Format the output using markdown. Use a lot of emojis and keep it very encouraging and visual.
+      Organize it exactly under these headers:
+      🌟 **Khái niệm cốt lõi (Core Concept)**: A clear, simple explanation for 11-year-olds.
+      📝 **Quy tắc & Công thức (Rules & Formulas)**: Short step-by-step instructions.
+      💡 **Ví dụ trực quan (Visual Examples)**: An example demonstrating the rule.
+      🧠 **Mẹo nhớ nhanh (Memory Trick)**: A fun way to remember.
+      
+      Keep it clean, concise, and direct. Do not enclose it in raw markdown blocks.
+      `;
+
+      const userPrompt = `
+      Format this textbook content into a study guide:
+      ---
+      ${stdout.slice(0, 8000)}
+      ---
+      `;
+
+      generateContentWithFallback(ai, [{ role: 'user', parts: [{ text: userPrompt }] }], systemPrompt, modelHeader, 0.3)
+        .then(response => {
+          res.json({
+            text: response.text || "Could not format textbook content.",
+            rawText: stdout
+          });
+        })
+        .catch(err => {
+          console.error("[Textbook Extract] Gemini formatting failed:", err);
+          res.status(500).json({ error: err.message || "Failed to format content with AI" });
+        });
+    });
+
+  } catch (error: any) {
+    console.error("Error in textbook extract route:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Excellent Student Model Solution AI route
+app.post('/api/gemini/model-solution', async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { 
+      questionText, 
+      correctAnswer, 
+      studentAnswer, 
+      hint, 
+      thinkingSkill, 
+      topic,
+      chosenLanguage = 'vi'
+    } = req.body;
+
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+    const ai = createDynamicClient(apiKeyHeader);
+
+    const systemPrompt = chosenLanguage === 'en' ?
+      `You are an AI Math Coach showing a model step-by-step solution written by a top-performing ("Học sinh Giỏi") Grade 6 student studying Cambridge Mathematics.
+      Show exactly how a student should write down their calculation and explanation to get full marks.
+      Use clear logical steps, proper math vocabulary (e.g. place value, denominator), and include brief explanations for why each step makes sense.
+      Keep the tone encouraging, structured, and easy to follow. Use bolding and LaTeX formatting (e.g., \\frac{a}{b}) for clarity.
+      Format like this:
+      🏆 **Perfect Student Solution:**
+      - **Step 1:** [Step title and details]
+      - **Step 2:** [Step title and details]
+      - **Final Answer:** [State final answer clearly]
+      💡 **Pro Writing Tip:** [Explain a key tip for writing proofs or checking answers]`
+      :
+      `You are an AI Math Coach showing a model step-by-step solution written by a top-performing ("Học sinh Giỏi") Grade 6 student studying Cambridge Mathematics.
+      Hãy chỉ ra chính xác cách viết lời giải và các bước tính toán chi tiết của một học sinh xuất sắc để đạt điểm tối đa.
+      Trình bày các bước logic, sử dụng thuật ngữ toán học chuẩn mực (ví dụ: quy đồng mẫu số, hàng phần mười), và giải thích ngắn gọn tại sao lại làm như vậy.
+      Giữ giọng văn tích cực, dễ học tập theo. Sử dụng định dạng in đậm và LaTeX (ví dụ: \\frac{a}{b}) cho các công thức.
+      Định dạng như sau:
+      🏆 **Bài giải mẫu của Học sinh Giỏi:**
+      - **Bước 1:** [Tiêu đề bước và chi tiết thực hiện]
+      - **Bước 2:** [Tiêu đề bước và chi tiết thực hiện]
+      - **Kết luận:** [Nêu đáp số rõ ràng]
+      💡 **Mẹo trình bày bài thi:** [Giải thích mẹo viết lời giải hoặc cách soát lỗi]`;
+
+    const userPrompt = chosenLanguage === 'en' ?
+      `Generate an excellent student model solution for:
+      - Topic: ${topic}
+      - Question: "${questionText}"
+      - Expected Answer: "${correctAnswer}"
+      - Hint: "${hint}"
+      - Thinking Skill: ${thinkingSkill}`
+      :
+      `Hãy viết bài giải mẫu của học sinh giỏi cho bài toán sau:
+      - Chủ đề: ${topic}
+      - Đề bài: "${questionText}"
+      - Đáp số đúng: "${correctAnswer}"
+      - Gợi ý: "${hint}"
+      - Kỹ năng tư duy: ${thinkingSkill}`;
+
+    if (!ai) {
+      const offlineSolution = chosenLanguage === 'en' ?
+        `🏆 **Perfect Student Solution (Offline Mode):**
+- **Step 1:** Identify the key parameters: topic is ${topic}. The problem asks: "${questionText}".
+- **Step 2:** Apply the standard calculation. Since the correct answer is "${correctAnswer}", we verify it step-by-step using the hint: "${hint}".
+- **Final Answer:** The answer is "${correctAnswer}".
+💡 **Pro Writing Tip:** Double check your decimal point positions or fractions scaling before submitting!`
+        :
+        `🏆 **Bài giải mẫu của Học sinh Giỏi (Chế độ Ngoại tuyến):**
+- **Bước 1:** Phân tích dữ kiện đề bài: Chủ đề ${topic}. Đề bài yêu cầu: "${questionText}".
+- **Bước 2:** Thực hiện phép tính. Dựa trên đáp án đúng là "${correctAnswer}", quy đổi hoặc tính toán theo gợi ý: "${hint}".
+- **Kết luận:** Đáp án chính xác là "${correctAnswer}".
+💡 **Mẹo trình bày bài thi:** Luôn kiểm tra lại cách rút gọn phân số hoặc vị trí của dấu phẩy số thập phân trước khi kết luận!`;
+
+      res.json({ text: offlineSolution, isOfflineMode: true });
+      return;
+    }
+
+    const response = await generateContentWithFallback(ai, [{ role: 'user', parts: [{ text: userPrompt }] }], systemPrompt, modelHeader, 0.5);
+    res.json({
+      text: response.text || "Could not generate model solution.",
+      isOfflineMode: false
+    });
+
+  } catch (error: any) {
+    console.error("Error in model-solution route:", error);
+    res.status(500).json({ error: error.message || "Failed to generate solution guide" });
   }
 });
 

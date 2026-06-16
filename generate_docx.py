@@ -49,7 +49,7 @@ def create_document(student_name, lang, questions, answers, filepath):
     title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title_run = title_p.add_run(
-        "VINSCHOOL MATHEMATICS LEARNING PORTAL\n" if lang == 'en' else "HỆ THỐNG HỌC TẬP TOÁN HỌC VINSCHOOL\n"
+        "MATHEMATICS LEARNING PORTAL\n" if lang == 'en' else "HỆ THỐNG HỌC TẬP TOÁN HỌC\n"
     )
     title_run.bold = True
     title_run.font.size = Pt(14)
@@ -157,7 +157,7 @@ def create_document(student_name, lang, questions, answers, filepath):
     doc.add_paragraph()
     foot_p = doc.add_paragraph()
     foot_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    foot_run = foot_p.add_run("Vinschool Cambridge Math Explorer - Dynamic AI Engine")
+    foot_run = foot_p.add_run("Cambridge Math Explorer - Dynamic AI Engine")
     foot_run.font.size = Pt(8)
     foot_run.italic = True
     foot_run.font.color.rgb = RGBColor(148, 163, 184)
@@ -206,7 +206,7 @@ def get_personalized_content(student_id, lang):
             client = genai.Client(api_key=api_key)
             
             prompt = f"""
-            You are a Cambridge Stage 6 Math Curriculum writer for Vinschool.
+            You are a Cambridge Stage 6 Math Curriculum writer.
             Write 5 personalized math practice questions and detailed step-by-step Socratic answers for student '{student_id}' in language '{lang}'.
             Focus on these areas: decimal place value shift, fraction simplification, and ratio scaling.
             Keep them appropriate for 11-year-olds. Return ONLY a valid JSON object matching this schema:
@@ -256,7 +256,7 @@ if __name__ == "__main__":
         'student_duc': 'Trần Đức',
         'student_linh': 'Phạm Linh'
     }
-    student_name = name_map.get(student_id, "Vinschool Student")
+    student_name = name_map.get(student_id, "Math Student")
     
     print(f"Generating personalized DOCX for {student_name}...")
     questions, answers = get_personalized_content(student_id, lang)

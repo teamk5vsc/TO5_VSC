@@ -143,7 +143,7 @@ export default function MathRunnerGame({
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Draw player avatar (Vinschool Runner)
+      // Draw player avatar (Math Explorer Runner)
       const playerX = 60;
       const playerY = lanePositions[playerLane];
 
