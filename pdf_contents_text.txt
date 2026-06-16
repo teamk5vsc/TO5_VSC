@@ -1,0 +1,997 @@
+
+========================================
+=== Text of first 15 pages of Stage 6_LB_Vol 1 (1).pdf ===
+========================================
+
+--- Page 1 ---
+Mary Wood, Emma Low, Greg Byrd & Lynn Byrd
+SÁCH HỌC SINH 6
+Quyển 1
+For VSC's internal use only
+
+--- Page 2 ---
+Shaftesbury Road, Cambridge CB2 8EA, United Kingdom
+One Liberty Plaza, 20th Floor, New York, NY 10006, USA
+477 Williamstown Road, Port Melbourne, VIC  3207, Australia
+314–321, 3rd Floor, Plot 3, Splendor Forum, Jasola District Centre, New Delhi – 110025, India
+103 Penang Road, #05–06/07, Visioncrest Commercial, Singapore 238467
+Cambridge University Press is part of the University of Cambridge.
+It furthers the University’s mission by disseminating knowledge in the pursuit of  
+education, learning and research at the highest international levels of excellence.
+www.cambridge.org 
+© Cambridge University Press 2022
+This publication is in copyright. Subject to statutory exception  
+and to the provisions of relevant collective licensing agreements,  
+no reproduction of any part may take place without the written  
+permission of Cambridge University Press.
+First edition 2022
+20  19  18  17  16  15  14  13  12  11  10  9  8  7  6  5  4  3  2  1
+Printed in Vietnam by FAHASA Printing House.
+A catalogue record for this publication is available from the British Library
+ISBN 978-1-009-31697-2 Paperback with Digital Access (1 Year)
+ISBN 555-5-559-50381-6 Digital Learner’s Book (1 Year)
+Cambridge University Press has no responsibility for the persistence or accuracy  
+of URLs for external or third-party internet websites referred to in this publication,  
+and does not guarantee that any content on such websites is, or will remain,  
+accurate or appropriate. Information regarding prices, travel timetables, and other  
+factual information given in this work is correct at the time of first printing but  
+Cambridge University Press does not guarantee the accuracy of such information  
+thereafter.
+Projects and their accompanying teacher guidance have been written by the  
+NRICH Team. NRICH is an innovative collaboration between the Faculties of  
+Mathematics and Education at the University of Cambridge, which focuses on  
+problem solving and on creating opportunities for students to learn mathematics  
+through exploration and discussion: nrich.maths.org.
+For VSC's internal use only
+
+--- Page 3 ---
+ 
+For VSC's internal use only
+
+--- Page 4 ---
+3
+Introduction
+Introduction
+Welcome to Stage 6 of Cambridge Primary Mathematics. We hope this book will show 
+you how interesting Mathematics can be and make you want to explore and investigate 
+mathematical ideas.
+Mathematics is everywhere. Developing our skills in mathematics makes us better problem-
+solvers through understanding how to reason, analyse and reflect. We use mathematics to 
+understand money and complete practical tasks like cooking and decorating. It helps us to 
+make good decisions in everyday life.
+In this book you will work like a mathematician to find the answers to questions like these:
+•
+ What is the value of 2 + 22 + 23?
+• Which would you choose 20% of $10 or 1
+10
+ of $20?
+• What is a common multiple?
+• Why is the answer to 3 × (4 + 5) dif ferent to the answer to 3 × 4 + 5? 
+• What time is it in Mumbai when it is 9  a.m. in Mexico City?
+• What is a r eflex angle?
+• How do you draw a waf fle diagram?
+• How can a shape be translated?
+Talk about the mathematics as you explore and learn. This helps you to reflect on what you did 
+and refine the mathematical ideas to develop a more effective approach or solution.
+You will be able to practise new skills, check  
+how you are doing and also challenge  
+yourself to find out more. You will be able  
+to make connections between what seem to  
+be different areas of mathematics.
+We hope you enjoy thinking and working  
+like a mathematician.
+Mary Wood, Emma Low, Greg Byrd and Lynn Byrd
+For VSC's internal use only
+
+--- Page 5 ---
+3
+ Lời mở đầu
+Lời mở đầu
+Chào mừng đến với Giai đoạn 6 của bộ sách Chương trình Cambridge Toán học bậc Tiểu 
+học. Chúng tôi hi vọng quyển sách này sẽ giúp em thấy được sự lí thú của Toán học, khiến em 
+muốn tìm tòi và khảo sát các ý tưởng toán học.
+Toán học hiện hữu ở khắp mọi nơi. Phát triển kĩ năng toán học giúp chúng ta giải quyết vấn đề 
+hiệu quả hơn nhờ hiểu được cách lập luận, phân tích và suy ngẫm. Chúng ta ứng dụng toán học 
+để hiểu về tiền tệ và hoàn thành các công việc thực tế như nấu nướng và trang trí. Toán học 
+cũng giúp chúng ta đưa ra quyết định đúng đắn trong cuộc sống hàng ngày.
+Trong quyển sách này, em sẽ làm việc như một nhà toán học để đi tìm đáp án cho những  
+câu hỏi như:
+•
+ Giá trị của 2 + 22 + 23 bằng bao nhiêu?
+• Em sẽ chọn 20% của $10 hay 1
+10
+ của $20?
+• Bội chung là gì?
+• T ại sao kết quả của phép tính 3 × (4 + 5) khác với kết quả của phép tính 3 × 4 + 5? 
+• Ở Mumbai đang là mấy giờ nếu ở Mexico City đang là 9 giờ sáng?
+• Góc lõm là gì?
+• Em vẽ biểu đồ waf fle bằng cách nào?
+• Tịnh tiến một hình như thế nào?
+Em hãy trao đổi về nội dung toán học trong quá trình khám phá và học hỏi. Việc này sẽ giúp 
+em nhìn nhận lại những gì đã làm và sàng lọc các ý tưởng toán học để phát triển cách  
+tiếp cận hoặc lời giải hiệu quả hơn.
+Em sẽ có thể thực hành các kĩ năng mới, kiểm tra 
+em đang làm việc như thế nào, đồng thời thử thách 
+bản thân khám phá nhiều hơn nữa. Em cũng có thể 
+liên kết các kiến thức toán học tưởng như là tách 
+biệt nhau.
+Chúng tôi hi vọng em sẽ cảm thấy lí thú khi được 
+Tư duy và thực hành như một nhà Toán học. 
+Mary Wood, Emma Low, Greg Byrd và Lynn Byrd
+For VSC's internal use only
+
+--- Page 6 ---
+4
+Contents
+Page Unit Maths strand
+5 How to use this book
+7 Thinking and Working Mathematically
+9 1 The number system
+1.1 Place value
+1.2 Rounding decimal numbers
+Number
+19 2 Numbers and sequences
+2.1 Counting and sequences
+2.2 Special numbers
+2.3 Common multiples and factors
+Number
+34 Project 1: Odd sequence
+35 3 Addition and subtraction (1)
+3.1 Positive and negative integers
+3.2 Using letters to r epresent numbers
+Number
+49 4 Fractions and per centages
+4.1 Understanding fractions
+4.2 Percentages
+4.3 Equivalence and comparison
+Number
+63 5 Addition and subtraction (2)
+5.1 Adding and subtracting decimal numbers
+5.2 Adding and subtracting fractions
+Number
+72 6 2D shapes
+6.1 Quadrilaterals
+6.2 Circles
+6.3 Rotational symmetry
+Geometry and measure
+92 Project 2: Petal problem
+93 7 Exploring measur es
+7.1 Rectangles and triangles
+7.2 Time
+Geometry and measure
+108 Project 3: Ordering times
+109 8 Averages
+8.1 Mode, median, mean and range 
+Geometry and measure
+120 Project 4: Sneaky statistics
+122 9 Pr obability  
+9.1 Describing and pr edicting likelihood
+Statistics and probability
+Contents
+For VSC's internal use only
+
+--- Page 7 ---
+4
+ Mục lục
+Trang Học phần Mạch toán học
+5 Hướng dẫn sử dụng sách
+7 Tư duy và Làm việc theo Toán học
+9 1 Hệ thống số
+1.1 Giá trị theo hàng
+1.2 Làm tr òn số thập phân
+Số học
+19 2 Số và dãy số
+2.1 Phép đếm và dãy số
+2.2 Các loại số đặc biệt 
+2.3 Bội chung và ước chung
+Số học
+34 Dự án 1: Dãy số lẻ
+35 3 Phép cộng và phép trừ (1)
+3.1 Số nguyên dương và số nguyên âm
+3.2 Dùng các chữ cái để biểu diễn các số 
+Số học
+49 4  Phân số và tỉ số phần trăm
+4.1 Hiểu về phân số
+4.2 Tỉ số phần trăm
+4.3 Sự bằng nhau và phép so sánh 
+Số học
+63 5 Phép cộng và phép trừ (2)
+5.1 Cộng và trừ các số thập phân 
+5.2 Cộng và trừ phân số
+Số học
+72 6 Hình 2D
+6.1 Hình tứ giác
+6.2 Hình tr òn, đường tròn
+6.3 Phép đối xứng quay 
+Hình học và đo lường
+92 Dự án 2: Các bài toán cánh hoa
+93 7 Khám phá các đơn vị đo lường
+7.1 Hình chữ nhật và hình tam giác
+7.2 Thời gian 
+Hình học và đo lường
+108 Dự án 3: Sắp xếp thời gian theo thứ tự
+109 8 Các giá trị trung bình
+8.1 Mốt, trung vị, số trung bình cộng và khoảng 
+biến thiên 
+Thống kê và xác xuất
+120 Dự án 4: Thống kê ngầm
+122 9 Xác suất  
+9.1 Mô tả và dự đoán khả năng 
+Thống kê và xác suất 
+Mục lục
+For VSC's internal use only
+
+--- Page 8 ---
+5
+How to use this book
+How to use this book
+In this book you will find lots of different features to help your learning. 
+Questions to find out what  
+you know already.
+What you will learn  
+in the unit.
+Important words  
+that you will use.
+Step-by-step examples  
+showing a way to solve  
+a problem.
+There are often many different 
+ways to solve a problem.
+For VSC's internal use only
+
+--- Page 9 ---
+5
+ Hướng dẫn sử dụng sách
+Hướng dẫn sử dụng sách
+Quyển sách này bao gồm nhiều phần khác nhau để hỗ trợ cho quá trình học tập của em:
+Các câu hỏi kiểm tra kiến thức  
+em đã biết.
+Những nội dung em sẽ học  
+trong học phần.
+Từ vựng quan trọng  
+em sẽ sử dụng.
+Ví dụ trình bày cách  
+giải bài toán theo  
+từng bước.
+ Thường có nhiều cách khác 
+nhau để giải một bài toán.
+Giá trị của chữ số 9 trong các số dưới đây là gì?
+Viết các số sau đây dưới dạng chữ và dạng số.
+Số còn thiếu là gì?
+Số nào lớn gấp 10 lần so với 0,01?
+Số nào nhỏ hơn một trăm lần so với 555?
+809,46                             2 021,89                     123 456,95
+Bắt đầu nào!
+Chúng ta sẽ cùng ...
+•  giải thích giá trị của mỗi chữ số tr ong các số có 3 chữ số thập phân
+•  nhân và chia số nguyên và số thập phân với 10, 100 và 1 000
+•  gộp, tách và nhóm lại các số có 3 chữ số thập phân. 
+cắt đôi  tách
+đường chéo lí giải  
+song song  hình thang
+200 000 + 5 000 + 400 + 8 + 0,9    
+500 000 + 70 000 + 30 + 6 + 0,01
+Đáp án: 13,136
+3 ,
+,10
+1 1
+1
+3 6
+1
+10
+1
+100
+1
+1 000
+Ví dụ minh hoạ 1
+Viết số sau dưới dạng số thập phân.
+Viết các số hạng theo thứ tự từ lớn đến nhỏ, 
+Đặt các chữ số vào bảng giá trị theo hàng 
+tương ứng
+1 000
+1 000
+For VSC's internal use only
+
+--- Page 10 ---
+6
+How to use this book
+An investigation to carry out  
+with a partner or in groups.  
+Where this icon appears ,  
+the activity will help develop  
+your skills of thinking and  
+working mathematically.
+Questions to help you think  
+about how you learn.
+What you have  
+learned in the unit. 
+Questions that cover  
+what you have learned  
+in the unit.
+At the end of several units,  
+there is a project for you to carry  
+out using what you have  
+learned. You might make  
+something or solve a problem.
+Projects and their accompanying  
+teacher guidance have been written  
+by the NRICH Team. NRICH is an  
+innovative collaboration between  
+the Faculties of Mathematics and  
+Education at the University of  
+Cambridge, which focuses on  
+problem solving and on creating  
+opportunities for students to learn  
+mathematics through exploration  
+and discussion: nrich.maths.org.
+These questions will help  
+you develop your skills 
+of thinking and working 
+mathematically.
+<screenshot of Project box>
+Project 3
+For VSC's internal use only
+
+--- Page 11 ---
+6
+ Hướng dẫn sử dụng sách
+Một khảo sát em sẽ thực hiện 
+theo cặp hoặc theo nhóm.
+Những hoạt động có gắn 
+biểu tượng  sẽ giúp em 
+phát triển kĩ năng Tư duy và 
+Làm việc theo Toán học.
+Các câu hỏi giúp em tư duy  
+về cách học tập.
+Những nội dung em đã học  
+trong học phần.
+Các câu hỏi bao quát những  
+nội dung em đã học trong  
+học phần.
+Ở cuối một số học phần, em sẽ 
+thực hiện một dự án bằng cách 
+vận dụng những kiến thức đã học. 
+Em có thể tạo ra một thứ gì đó 
+hoặc giải một bài toán.
+Các dự án và hướng dẫn kèm theo 
+dành cho giáo viên được soạn 
+thảo bởi đội ngũ NRICH. NRICH 
+là sự cộng tác mang tính đổi mới 
+giữa Khoa Toán học và Khoa Giáo 
+dục của Đại học Cambridge, có 
+nội dung chú trọng vào kĩ năng 
+giải quyết vấn đề và tạo cơ hội 
+cho học sinh tìm hiểu về toán học 
+thông qua việc khám phá và thảo 
+luận: nrich.maths.org.
+Những câu hỏi này sẽ 
+giúp em phát triển kĩ 
+năng Tư duy và Làm việc 
+theo Toán học. 
+<screenshot of Project box>
+Suy nghĩ về đáp án của em. Còn có đáp án khả thi khác 
+không? Làm sao em biết? Em có nghĩ đến việc kiểm tra câu 
+trả lời của mình với bạn cùng nhóm không?
+Sắp xếp thời gian theo thứ tự
+Sắp xếp các khoảng thời gian sau theo thứ tự tăng dần.
+Em có thể dùng sự trợ giúp của máy tính.
+Một thập kỉ
+100 000 giờ
+Thời gian để em nói 
+hết bảng chữ cái
+Hai tuần
+Thời gian kể từ 
+khi phát minh ra 
+điện thoại.
+Một nghìn giây
+Thời gian em cần 
+để ăn xong một 
+bữa ăn
+Một ngày
+Thời gian kể từ Thế 
+vận hội Olympic 
+cuối cùng
+5 000 000 phút
+Thời gian kể từ khi 
+em được sinh ra
+Một phút
+Một thế kỉ
+1 000 ngày
+Một năm
+Một giây
+Thời gian để ánh 
+sáng từ Mặt trời 
+đến Trái đất
+1 000 tháng
+Một tháng
+Thời gian Mặt trăng 
+đi một vòng quanh 
+Trái Đất
+Dự án 3
+Tư duy như một nhà Toán học
+Chú chó Daphne đã có 4 lứa con. Số trung bình cộng chó con trong một lứa là 5. 
+Khảo sát xem mỗi lứa có thể có bao nhiêu con chó con. Hãy tìm các cách khác nhau 
+để tạo ra số trung bình cộng là 5. 
+Em nhận thấy gì về tổng số chó con trong mỗi lời giải có số trung bình cộng là 5? 
+Kiểm tra xem điều đó có đúng với lời giải khác nữa không. Giải thích điều em tìm ra. 
+Em đã học được gì?
+Em có thể giải thích giá trị của mỗi chữ số trong các số có 3 chữ số thập phân.
+Em có thể nhân và chia số nguyên và số thập phân cho 10, 100 và 1 000.
+Em có thể gộp, tách và nhóm lại các số có 3 chữ số thập phân.
+Kiểm tra sự tiến bộ của em
+1 Hassan đếm các số cách đều 0,4 đơn vị. 
+ Số đầu tiên của bạn ấy là 1. 
+ Bạn ấy đếm 1; 1,4; 1,8;... 
+ Số hạng thứ mười tr ong dãy số của bạn ấy là số nào?  
+For VSC's internal use only
+
+--- Page 12 ---
+7
+Thinking and Working 
+Mathematically
+There are some important skills that you will develop as you learn mathematics.  
+Thinking and Working Mathematically
+Specialising  
+is when I choose an 
+example and check to see if 
+it satisfies or does not satisfy 
+specific mathematical 
+criteria.
+Classifying  
+is when I organise 
+objects into groups according 
+to their mathematical 
+properties.
+Generalising  
+is when I recognise 
+an underlying pattern by 
+identifying many examples that 
+satisfy the same mathematical 
+criteria.
+Characterising  
+is when I identify and describe  
+the mathematical properties  
+of an object.
+For VSC's internal use only
+
+--- Page 13 ---
+ 
+Tư duy và Làm việc  
+theo Toán học
+Em sẽ phát triển một số kĩ năng quan trọng khi học toán.
+Tư duy và Làm việc theo Toán học
+Đặc điểm hoá là khi em xác 
+định và mô tả các tính chất 
+toán học của một đối tượng.
+7
+Cụ thể hoá  
+là khi em chọn một ví dụ và 
+kiểm tra xem ví dụ đó thoả 
+mãn hay không thoả mãn 
+các tiêu chí T oán học 
+cụ thể.
+ 
+Khái quát hoá  
+là khi em nhận ra một quy 
+luật cơ bản bằng cách xác định 
+nhiều ví dụ thoả mãn cùng 
+một tiêu chí T oán học.
+ 
+Phân loại  
+là khi em tổ chức các đối 
+tượng thành các nhóm theo 
+tính chất T oán học  
+của chúng.
+For VSC's internal use only
+
+--- Page 14 ---
+8 14
+Critiquing 
+is when I compare 
+and evaluate mathematical 
+ideas, representations 
+or solutions to identify 
+advantages and 
+disadvantages.
+Conjecturing is  
+when I form mathematical 
+questions or ideas.
+Convincing  
+is when I present 
+evidence to justify or 
+challenge a mathematical 
+idea or solution.
+Improving  
+is when I refine 
+mathematical ideas or 
+representations to develop a 
+more effective approach  
+or solution.
+Thinking and Working Mathematically
+For VSC's internal use only
+
+--- Page 15 ---
+8
+Phỏng đoán là khi 
+em lập ra câu hỏi hoặc ý 
+tưởng T oán học.
+Cải tiến là 
+khi em tinh chỉnh các 
+ý tưởng hoặc cách biểu diễn 
+T oán học để phát triển cách 
+tiếp cận hoặc lời giải hợp 
+lí hơn.
+Tư duy và Làm việc theo Toán học
+ 
+Phản biện  
+là khi em so sánh và đánh 
+giá các ý tưởng T oán học, cách 
+biểu diễn hoặc lời giải để xác 
+định các ưu điểm và 
+nhược điểm
+ 
+Thuyết phục là khi 
+em trình bày bằng chứng 
+để lí giải hoặc thử thách 
+một ý tưởng T oán học 
+hay lời giải.
+For VSC's internal use only
+
+
+========================================
+=== Text of first 15 pages of Stage 6_LB_Vol 2.pdf ===
+========================================
+
+--- Page 1 ---
+Mary Wood, Emma Low, Greg Byrd & Lynn Byrd
+SÁCH HỌC SINH 6
+Quyển 2
+For VSC's internal use only
+
+--- Page 2 ---
+Shaftesbury Road, Cambridge CB2 8EA, United Kingdom
+One Liberty Plaza, 20th Floor, New York, NY 10006, USA
+477 Williamstown Road, Port Melbourne, VIC  3207, Australia
+314–321, 3rd Floor, Plot 3, Splendor Forum, Jasola District Centre, New Delhi – 110025, India
+103 Penang Road, #05–06/07, Visioncrest Commercial, Singapore 238467
+Cambridge University Press is part of the University of Cambridge.
+It furthers the University’s mission by disseminating knowledge in the pursuit of  
+education, learning and research at the highest international levels of excellence.
+www.cambridge.org 
+© Cambridge University Press 2022
+This publication is in copyright. Subject to statutory exception  
+and to the provisions of relevant collective licensing agreements,  
+no reproduction of any part may take place without the written  
+permission of Cambridge University Press.
+First edition 2022
+20  19  18  17  16  15  14  13  12  11  10  9  8  7  6  5  4  3  2  1
+Printed in Vietnam by FAHASA Printing House.
+A catalogue record for this publication is available from the British Library
+ISBN 978-1-009-31699-6 Paperback with Digital Access (1 Year)
+ISBN 555-5-559-50381-6 Digital Learner’s Book (1 Year)
+Cambridge University Press has no responsibility for the persistence or accuracy  
+of URLs for external or third-party internet websites referred to in this publication,  
+and does not guarantee that any content on such websites is, or will remain,  
+accurate or appropriate. Information regarding prices, travel timetables, and other  
+factual information given in this work is correct at the time of first printing but  
+Cambridge University Press does not guarantee the accuracy of such information  
+thereafter.
+Projects and their accompanying teacher guidance have been written by the  
+NRICH Team. NRICH is an innovative collaboration between the Faculties of  
+Mathematics and Education at the University of Cambridge, which focuses on  
+problem solving and on creating opportunities for students to learn mathematics  
+through exploration and discussion: nrich.maths.org.
+For VSC's internal use only
+
+--- Page 3 ---
+ 
+For VSC's internal use only
+
+--- Page 4 ---
+Contents
+Page Unit Maths strand
+4 10 Multiplication and division (1)
+10.1 Multiplication
+10.2 Division
+10.3 T ests of divisibility
+Number
+18 11 Ratio and pr oportion
+11.1 Ratio
+11.2 Dir ect proportion
+Number
+30 12 Multiplication and division (2)
+12.1 Multiplying and dividing fractions
+12.2 Multiplying decimals
+12.3 Dividing decimals
+Number
+42 13 The laws of arithmetic
+13.1 The laws of arithmetic
+Number
+48 14 3D shapes
+14.1 Shapes and nets
+14.2 Capacity and volume
+Geometry and measure
+65 15 Angles
+15.1 Measuring and drawing angles
+15.2 Angles in a triangle
+Geometry and measure
+78 Project 5: Animal angles
+80 16 Transformations
+16.1 Coor dinates and translations
+16.2 Reflections
+16.3 Rotations
+Geometry and measure
+101 Project 6: Considering coordinates
+104 17 Data
+17.1 Bar charts, dot plots, waf fle diagrams  
+and pie charts
+17.2 Fr equency diagrams, line graphs and  
+scatter graphs
+Statistics and probability
+124 Glossary
+134 Acknowledgements
+Contents
+3
+For VSC's internal use only
+
+--- Page 5 ---
+ Mục lục
+Trang Học phần Mạch Toán học
+4 10 Phép nhân và phép chia (1)
+10.1 Phép nhân
+10.2 Phép chia 
+10.3 Dấu hiệu chia hết 
+Số học
+18 11 Tỉ số và tỉ lệ 
+11.1 Tỉ số
+11.2 Tỉ lệ thuận
+Số học
+30 12 Phép nhân và phép chia (2)
+12.1 Nhân và chia các phân số 
+12.2 Nhân các số thập phân
+12.3 Chia các số thập phân
+Số học
+42 13 Các tính chất số học
+13.1 Các tính chất số học 
+Số học
+48 14 Hình 3D
+14.1 Hình và hình trải phẳng 
+14.2 Dung tích và thể tích 
+Hình học và đo lường
+65 15 Góc
+15.1 Đo và vẽ góc 
+15.2 Các góc tr ong một tam giác
+Hình học và đo lường
+78  Dự án 5: Góc động vật  
+80 16 Phép biến hình
+16.1 T oạ độ và phép tịnh tiến
+16.2 Phép đối xứng 
+16.3 Phép quay
+Hình học và đo lường
+101 Dự án 6: Xem xét toạ độ 
+104 17 Dữ liệu
+17.1 Biểu đồ cột, đồ thị điểm, biểu đồ waf fle và 
+biểu đồ tròn
+17.2 Biểu đồ tần số, biểu đồ đường và biểu đồ  
+phân tán 
+Thống kê và xác suất
+124 Bảng chú giải thuật ngữ
+134 Lời cảm ơn
+Mục lục
+3
+For VSC's internal use only
+
+--- Page 6 ---
+Getting started 
+1 Calculate.
+a 704 × 6 b 34 × 27 c 603 ÷ 9
+2 Nine lamp posts are equally spaced along a river bank.
+ The posts are 180 metres apart. What is the distance between the  
+first lamp post and the last lamp post in metres?
+3 Find the missing digit.
+ 
+2 ÷ 7 = 3 65
+4 Zina is thinking of a multiple of 5 that is divisible by 8.
+ What is the smallest number Zina could be thinking of?
+5 Here are four digit cards.
+ 
+0 1 2 3
+ Use each card once to complete the calculation.
+ 
+× = 360
+10 Multiplication and 
+division (1)
+4
+For VSC's internal use only
+
+--- Page 7 ---
+Bắt đầu nào!
+1 Tính.
+a 704 × 6 b 34 × 27 c 603 ÷ 9
+2 Chín cột đèn nằm cách đều nhau dọc theo một bờ sông.
+ Các cột cách nhau 180 mét. Hỏi khoảng cách giữa cột đèn đầu tiên và  
+cột đèn cuối cùng là bao nhiêu mét?
+3 Tìm chữ số còn thiếu.
+ 
+2 ÷ 7 = 3 65
+4 Zina đang nghĩ đến một bội số của 5 mà chia hết cho 8.
+ Số nhỏ nhất mà Zina có thể nghĩ đến là số nào?
+5 Dưới đây là bốn thẻ chữ số.
+ 
+0 1 2 3
+ Sử dụng mỗi thẻ một lần để hoàn thành phép tính sau.
+ 
+× = 360
+10 Phép nhân và 
+phép chia (1)
+4
+For VSC's internal use only
+
+--- Page 8 ---
+10  Multiplication and division (1)
+Lots of people multiply and divide numbers as part of their work.
+Scientist
+Doctor
+Astronomer
+Teacher
+Can you think of other jobs where you need to multiply or divide? 
+This unit is all about multiplication and division.
+5
+For VSC's internal use only
+
+--- Page 9 ---
+10  Phép nhân và phép chia (1)
+Rất nhiều người nhân và chia các số như một phần trong công việc của họ.
+Nhà khoa học
+Bác sĩ
+Nhà thiên văn học
+Giáo viên
+Em có thể nghĩ ra những công việc khác cũng cần nhân hoặc chia không?
+Toàn bộ học phần này nói về phép nhân và phép chia.
+5
+For VSC's internal use only
+
+--- Page 10 ---
+10  Multiplication and division (1)
+Imagine you sell stamps. 
+Each sheet has 10 columns and  
+16 rows, and you have 12 sheets  
+of stamps. 
+How many stamps do you  
+have altogether?  
+You need to multiply 10 × 16 × 12  
+to find the answer.
+  10.1  Multiplication
+We are going to …
+• estimate the size of an answer befor e calculating it
+• multiply whole numbers up to 10  000 by 1-digit or 2-digit whole numbers.
+product
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+Can you think of times when you multiply numbers together? 
+6
+For VSC's internal use only
+
+--- Page 11 ---
+10  Phép nhân và phép chia (1)
+Hãy tưởng tượng em bán các  
+con tem ở bên.
+Mỗi tờ tem có 10 cột và 16 hàng,  
+và em có 12 tờ tem. 
+Em có tất cả bao nhiêu con tem?  
+Em cần thực hiện phép nhân  
+10 × 16 × 12 để tìm ra đáp án.
+  10.1  Phép nhân
+Chúng ta sẽ cùng…
+• ước lượng phạm vi kết quả trước khi tính
+• nhân các số nguyên tr ong phạm vi 10 000 với các số nguyên có 1 hoặc 2 chữ số.
+tích
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+3 3 3 3 3 3 3 3 3 3
+Em có thể nghĩ ra những lần mà em cần nhân các số với nhau không?
+6
+For VSC's internal use only
+
+--- Page 12 ---
+10  Multiplication and division (1)
+Worked example 1
+Find the product of 1347 × 8.
+Estimate: 1000 × 8 = 8000
+1500 × 8 = 12 000
+×
+6
+5 3 2
+7 7 1 0
+7 4 3 1
+8
+×
+6
+5 3
+7
+7 4 3 1
+8
+×
+6
+5
+7 4 3 1
+8
+×
+6
+5 3 2
+7 7
+7 4 3 1
+8
+Start by making an estimate.
+The answer is between 8000 and 12 000.
+7 × 8 = 56   
+Put 6 in the answer box and carry 5 tens.
+40 × 8 = 320
+Add 5 tens to give 37 tens. Put 7 tens in the  
+answer box and carry 3 hundreds.
+300 × 8 = 2400
+Add 3 hundreds to give 27 hundreds. Put 7 hundreds  
+in the answer box and carry 2 thousands.
+1000 × 8 = 8000
+Add 2 thousands to give 10 000.  
+Record in the answer box.
+Answer:
+10 776
+Check your answer against the estimate to make sure  
+it is reasonable.
+Exercise 10.1
+1 Lexi estimates the answer to 1499 × 59 to be 900 000.  
+Has she made a good estimate? Explain your answer.
+2 Calculate.
+a 4224 × 7 b 6174 × 6 c 3748 × 8 
+ Check your answers with your partner.
+Remember to estimate 
+all your answers before 
+you do the calculation.
+Tip
+7
+For VSC's internal use only
+
+--- Page 13 ---
+10  Phép nhân và phép chia (1)
+Ví dụ minh hoạ 1
+Tìm tích 1 347 × 8.
+Ước lượng: 1 000 × 8 = 8 000
+1 500 × 8 = 12 000
+×
+6
+5 3 2
+7 7 1 0
+7 4 3 1
+8
+×
+6
+5 3
+7
+7 4 3 1
+8
+×
+6
+5
+7 4 3 1
+8
+×
+6
+5 3 2
+7 7
+7 4 3 1
+8
+Bắt đầu bằng cách thực hiện ước lượng.
+Đáp án là trong khoảng 8 000 đến 12 000.
+7 × 8 = 56   
+Đặt 6 vào ô đáp án và nhớ 5 chục.
+40 × 8 = 320
+Thêm 5 chục để được 37 chục. Đặt 7 chục vào ô đáp án và 
+nhớ 3 trăm.
+300 × 8 = 2 400
+Thêm 3 trăm để được 27 trăm. Đặt 7 trăm vào ô đáp án và 
+nhớ 2 nghìn.
+1 000 × 8 = 8 000
+Thêm 2 nghìn để được 10 000.  
+Ghi vào ô đáp án.
+Đáp án:
+10 776
+Kiểm tra đáp án của em so với ước lượng để đảm bảo  
+đáp án là hợp lí.
+Bài tập 10.1
+1 Lexi ước lượng đáp án của phép nhân 1 499 × 59 là 900 000.  
+Bạn ấy đã ước lượng tốt chưa? Giải thích câu trả lời của em.
+2 Tính.
+a 4 224 × 7 b 6 174 × 6 c 3 748 × 8 
+ Kiểm tra đáp án của em với bạn cùng lớp.
+Hãy nhớ ước lượng 
+tất cả các đáp án 
+trước khi thực hiện 
+phép tính.
+Mách nhỏ
+7
+For VSC's internal use only
+
+--- Page 14 ---
+10  Multiplication and division (1)
+3 Find the product of 1234 and 7.
+4 Pierre calculates 6024 × 7. His answer is not correct.
+ 
+8
+2 1
+6 8 4 2
+4 2 0 6
+7×
+ Identify the error, then write the correct answer.
+How did you decide what Pierre has done wrong?  
+How did you explain your answer? Did you think about 
+showing your answer on a diagram? This might be easier 
+than writing a sentence to explain your answer.
+5 Which of these multiplications have the answer 24 000?
+ 60 × 4000   400 × 60    80 × 3000
+ 8000 × 3    20 × 1200
+6 Kiki’s heart beats about 79 times each minute. How many times  
+does her heart beat in a day?
+7 Calculate.
+a 5489 × 30 b 3279 × 50 c 7621 × 70
+8 Calculate.
+a 1356 × 19 b 1571 × 43 c 7625 × 57
+ Check your answers with your partner.
+8
+For VSC's internal use only
+
+--- Page 15 ---
+10  Phép nhân và phép chia (1)
+3 Tìm tích của 1 234 và 7.
+4 Pierre tính 6 024 × 7. Đáp án của bạn ấy không đúng.
+ 
+8
+2 1
+6 8 4 2
+4 2 0 6
+7×
+ Hãy xác định lỗi sai của bạn ấy, sau đó viết đáp án đúng.
+Làm thế nào em xác định được lỗi sai của Pierre? 
+Em giải thích đáp án của mình như thế nào? Em có nghĩ về việc 
+biểu diễn đáp án của mình trên một sơ đồ không? Điều này có thể 
+dễ dàng hơn việc viết một câu để giải thích đáp án của em.
+5 Phép nhân nào trong số các phép nhân sau có kết quả là 24 000?
+ 60 × 4 000   400 × 60     80 × 3 000
+ 8 000 × 3    20 × 1 200
+6 Tim của Kiki đập khoảng 79 lần mỗi phút. Hỏi tim bạn ấy đập bao nhiêu  
+lần trong một ngày?
+7 Tính.
+a 5 489 × 30 b 3 279 × 50 c 7 621 × 70
+8 Tính.
+a 1 356 × 19 b 1 571 × 43 c 7 625 × 57
+ Kiểm tra đáp án của em với bạn cùng lớp.
+8
+For VSC's internal use only
+

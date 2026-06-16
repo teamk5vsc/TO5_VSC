@@ -1,0 +1,31 @@
+=== Inspecting Stage 6_LB_Vol 1 (1).pdf ===
+Total pages: 261
+
+Outline (Bookmarks) found:
+  - Stage 6_Intro_LB_p1-9 (sửa 20.06.22) _Q1 (4 góc)
+  - Stage 6_c01_LB _T sửa 28.10.22 (4 góc)
+  - Stage 6 _c02_LB_p20-35 (T) sửa 28.10.22 (4 góc)
+  - Stage 6 _C03_LB_p49-62 (04)(T) 29.03.22 sửa 28.10.22 (4 góc)
+  - Stage 6 _C04_LB_p84-97 (06) (T) 29.03.22 sửa 28.10.22 (4 góc)
+  - Stage 6 _C05_LB_p114-122 (08) (T) 27.04.22 sửa 28.10.22 (4 góc)
+  - Stage 6 _C06_LB_p63-83 (05) (T) 29.03.22 sửa 20.06.22 (4 góc)
+  - Stage 6 _C07_LB_p98-113 (T) 27.04.22 sửa 28.10.22 (4 góc)
+  - Stage 6 _C08_LB_p36-48 (03)(T) sửa 28.10.22 (4 góc)
+  - Stage 6 _C09_LB_p123-132 (T) 29.04.22 sửa 28.10.22 (4 góc)
+
+========================================
+
+=== Inspecting Stage 6_LB_Vol 2.pdf ===
+Total pages: 267
+
+Outline (Bookmarks) found:
+  - Stage 6_Intro_LB_p1-9 (31.05.22) _Q2 (4 goc)
+  - Stage 6 _C10_LB_p133-146 (T)_sửa 08.08.22 (4 goc)
+  - Stage 6 _C11_LB_p164-175 (T) (12) sửa 27.06.22 (4 goc) 
+  - Stage 6 _C12_LB_p191-202 (14) (T) 12.07.22 sửa 29.07.22 (4 goc) 
+  - Stage 6 _C13_LB_p223-228 (16) (T) sửa 11.08.22  (4 goc)
+  - Stage 6_C14_LB_p147-163 (11)_V_T sửa 08.08.22 (4 goc)
+  - Stage 6 _C15_LB_p176-190 (13) (T) 12.07.22 sửa 29.07.22 (4 goc) 
+  - Stage 6 _C16_LB_p229-252 (17) (T) sửa 11.08.22  (4 goc)
+  - Stage 6 _C17_LB_p203-222 (15) (T) 12.07.22 sửa 29.07.22 (4 goc) 
+  - Stage 6_GSY_253-264_(T) (4 goc)
