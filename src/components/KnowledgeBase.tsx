@@ -201,52 +201,175 @@ export default function KnowledgeBase() {
       const apiKey = localStorage.getItem('gemini_api_key') || '';
       const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
 
-      const response = await fetch('/api/gemini/knowledge-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'x-gemini-model': selectedModel
-        },
-        body: JSON.stringify({
-          query: queryText,
-          context,
-          history: historyContext,
-          lang: language
-        })
-      });
+      let responseText = '';
+      let isOfflineMode = false;
 
-      if (!response.ok) {
-        let errMsg = `HTTP ${response.status}`;
-        try {
-          const errData = await response.json();
-          errMsg = errData.error || errMsg;
-        } catch (_) {
-          try {
-            const errText = await response.text();
-            if (errText && errText.length < 200) {
-              errMsg = errText;
-            }
-          } catch (_) {}
-        }
-        throw new Error(errMsg);
-      }
-
-      let data;
       try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error(language === 'vi' 
-          ? 'Không thể giải mã câu trả lời từ máy chủ (Phản hồi không phải JSON).' 
-          : 'Could not decode server response (Invalid JSON).');
+        const response = await fetch('/api/gemini/knowledge-chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'x-gemini-model': selectedModel
+          },
+          body: JSON.stringify({
+            query: queryText,
+            context,
+            history: historyContext,
+            lang: language
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        responseText = data.text;
+        isOfflineMode = !!data.isOfflineMode;
+      } catch (backendErr) {
+        console.warn("Backend API failed. Initiating client-side direct Gemini / Search fallback.", backendErr);
+        
+        let clientFallbackSuccess = false;
+
+        const isValidGeminiKey = (key: string | null | undefined): boolean => {
+          if (!key) return false;
+          const k = key.trim();
+          return k.startsWith("AIzaSy") && k.length > 15;
+        };
+
+        if (isValidGeminiKey(apiKey)) {
+          try {
+            // Client-side prompt construction
+            const systemPrompt = language === 'en'
+              ? `You are a helpful AI study assistant for Grade 5-6 students studying Cambridge Primary Mathematics.
+The student has uploaded their own study materials. Below is the full text content extracted from these materials.
+
+----------------------
+STUDENT UPLOADED MATERIALS CONTEXT:
+${context}
+----------------------
+
+YOUR INSTRUCTIONS:
+1. Answer questions ONLY based on the provided document context. Do not use external knowledge unless it is directly helpful to explain a mathematical term present in the text.
+2. If the answer cannot be found in the provided documents, state clearly: "This information is not available in the uploaded documents." or "Thông tin này không có trong tài liệu đã upload." based on the student's language.
+3. Always cite the exact source document and page number in your response in the format: [📄 filename, page X] (e.g. [📄 lesson6.pdf, page 4]). If the source is a text file with no pages, write [📄 filename].
+4. Use clear, encouraging, and age-appropriate language (suitable for 10-12 year old children).
+5. Render all mathematical expressions beautifully using standard LaTeX formatting (e.g. \\(E=mc^2\\) or \\(\\frac{1}{2}\\)) so they look premium and elegant.
+6. Respond in English.`
+              : `Bạn là trợ lý học tập AI hữu ích cho học sinh lớp 5-6 đang học môn Toán Tiểu học Cambridge (Cambridge Primary Mathematics).
+Học sinh đã tải lên tài liệu học tập của mình. Dưới đây là toàn bộ nội dung văn bản trích xuất từ tài liệu đó.
+
+----------------------
+BỐI CẢNH TÀI LIỆU HỌC SINH TẢI LÊN:
+${context}
+----------------------
+
+HƯỚNG DẪN DÀNG CHO BẠN:
+1. TRẢ LỜI CÂU HỎI CHỈ DỰA TRÊN bối cảnh tài liệu được cung cấp ở trên. Không sử dụng kiến thức bên ngoài trừ khi điều đó trực tiếp giúp giải thích thuật ngữ toán học có trong văn bản.
+2. Nếu câu trả lời không tìm thấy trong tài liệu được cung cấp, hãy nói rõ: "Thông tin này không có trong tài liệu đã upload."
+3. Luôn trích dẫn chính xác tài liệu nguồn và số trang trong câu trả lời của bạn dưới định dạng: [📄 tên_file, trang X] (ví dụ: [📄 bài_giảng.pdf, trang 4]). Nếu nguồn là file văn bản không chia trang, hãy viết [📄 tên_file].
+4. Sử dụng ngôn ngữ rõ ràng, ấm áp, khuyến khích và phù hợp với lứa tuổi học sinh lớp 5-6 (10-12 tuổi).
+5. Định dạng tất cả các công thức toán học và biểu thức bằng LaTeX tiêu chuẩn (ví dụ: \\(A = \\pi r^2\\) hoặc \\(\\frac{a}{b}\\)) để hiển thị cao cấp và đẹp mắt.
+6. Trả lời bằng tiếng Việt.`;
+
+            let targetModel = selectedModel;
+            if (targetModel.includes('gemini-3-flash')) targetModel = 'gemini-2.5-flash';
+            if (targetModel.includes('gemini-3-pro')) targetModel = 'gemini-2.5-pro';
+
+            // Filter out welcome message or any leading model message from Gemini history
+            const filteredHistory = historyContext.map(h => ({
+              role: h.role === 'user' ? 'user' : 'model',
+              parts: [{ text: h.text }]
+            }));
+            
+            while (filteredHistory.length > 0 && filteredHistory[0].role === 'model') {
+              filteredHistory.shift();
+            }
+
+            const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [
+                  ...filteredHistory,
+                  { role: 'user', parts: [{ text: queryText }] }
+                ],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { temperature: 0.6 }
+              })
+            });
+
+            if (!googleResponse.ok) {
+              throw new Error(`Google API status ${googleResponse.status}`);
+            }
+
+            const googleData = await googleResponse.json();
+            responseText = googleData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            isOfflineMode = false;
+            clientFallbackSuccess = true;
+          } catch (googleErr) {
+            console.warn("Direct Google API call failed. Falling back to offline search.", googleErr);
+          }
+        }
+
+        if (!clientFallbackSuccess) {
+          // Offline local keyword search logic
+          if (!context || context.trim() === '' || context === 'No documents uploaded yet.') {
+            responseText = language === 'vi'
+              ? "Không có dữ liệu tài liệu học tập. Vui lòng kéo thả file sách/tài liệu ở cột bên trái trước."
+              : "No document context is available. Please upload documents first.";
+          } else {
+            const queryWords = queryText.toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+              .split(/\s+/)
+              .filter((w: string) => w.length > 2);
+            
+            let bestChunk = "";
+            let bestSource = "";
+            let maxMatches = 0;
+
+            const pages = context.split(/\[Source: (.*?), Page: (\d+)\]/g);
+            for (let idx = 1; idx < pages.length; idx += 3) {
+              const fileName = pages[idx];
+              const pageNum = pages[idx + 1];
+              const pageText = pages[idx + 2] || "";
+              if (!fileName || !pageNum) continue;
+              
+              let matches = 0;
+              queryWords.forEach((word: string) => {
+                if (pageText.toLowerCase().includes(word)) {
+                  matches++;
+                }
+              });
+
+              if (matches > maxMatches) {
+                maxMatches = matches;
+                bestChunk = pageText.trim().substring(0, 400) + "...";
+                bestSource = `[📄 ${fileName}, trang ${pageNum}]`;
+              }
+            }
+
+            if (maxMatches > 0) {
+              responseText = language === 'vi'
+                ? `[Chế độ Ngoại tuyến] Tìm thấy đoạn liên quan trong tài liệu:\n\n"${bestChunk}"\n\nNguồn: ${bestSource}`
+                : `[Offline Mode] Found matching snippet in documents:\n\n"${bestChunk}"\n\nSource: ${bestSource}`;
+            } else {
+              responseText = language === 'vi'
+                ? "Hệ thống đang chạy ngoại tuyến và không tìm thấy từ khóa trùng khớp trong tài liệu đã tải lên. Em hãy đặt câu hỏi khác hoặc kiểm tra kết nối mạng."
+                : "System is offline, and no direct matches were found in documents. Please enter a different query or restore internet connection.";
+            }
+          }
+          isOfflineMode = true;
+        }
       }
 
       const aiMsg: Message = {
         id: `ai_${Date.now()}`,
         role: 'model',
-        text: data.text,
+        text: responseText,
         timestamp: new Date(),
-        isOffline: data.isOfflineMode
+        isOffline: isOfflineMode
       };
 
       setMessages(prev => [...prev, aiMsg]);

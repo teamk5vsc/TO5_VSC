@@ -98,31 +98,126 @@ export default function AICoachModal({
       const apiKey = localStorage.getItem('gemini_api_key') || '';
       const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
 
-      const response = await fetch('/api/gemini/model-solution', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'x-gemini-model': selectedModel
-        },
-        body: JSON.stringify({
-          questionText: getLangText(question.questionText),
-          correctAnswer: getLangText(question.correctAnswer),
-          studentAnswer: studentAnswer,
-          hint: getLangText(question.hint),
-          thinkingSkill: question.thinkingSkill,
-          topic: question.topic,
-          chosenLanguage: language
-        })
-      });
+      let responseText = '';
+      try {
+        const response = await fetch('/api/gemini/model-solution', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'x-gemini-model': selectedModel
+          },
+          body: JSON.stringify({
+            questionText: getLangText(question.questionText),
+            correctAnswer: getLangText(question.correctAnswer),
+            studentAnswer: studentAnswer,
+            hint: getLangText(question.hint),
+            thinkingSkill: question.thinkingSkill,
+            topic: question.topic,
+            chosenLanguage: language
+          })
+        });
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to fetch model solution");
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        responseText = data.text;
+      } catch (backendErr) {
+        console.warn("Backend API failed for model solution. Initiating client-side direct Gemini fallback.", backendErr);
+        
+        let clientFallbackSuccess = false;
+
+        const isValidGeminiKey = (key: string | null | undefined): boolean => {
+          if (!key) return false;
+          const k = key.trim();
+          return k.startsWith("AIzaSy") && k.length > 15;
+        };
+
+        if (isValidGeminiKey(apiKey)) {
+          try {
+            const systemPrompt = language === 'en' ?
+              `You are an AI Math Coach showing a model step-by-step solution written by a top-performing ("Học sinh Giỏi") Grade 6 student studying Cambridge Mathematics.
+Show exactly how a student should write down their calculation and explanation to get full marks.
+Use clear logical steps, proper math vocabulary (e.g. place value, denominator), and include brief explanations for why each step makes sense.
+Keep the tone encouraging, structured, and easy to follow. Use bolding and LaTeX formatting (e.g., \\frac{a}{b}) for clarity.
+Format like this:
+🏆 **Perfect Student Solution:**
+- **Step 1:** [Step title and details]
+- **Step 2:** [Step title and details]
+- **Final Answer:** [State final answer clearly]
+💡 **Pro Writing Tip:** [Explain a key tip for writing proofs or checking answers]`
+              :
+              `You are an AI Math Coach showing a model step-by-step solution written by a top-performing ("Học sinh Giỏi") Grade 6 student studying Cambridge Mathematics.
+Hãy chỉ ra chính xác cách viết lời giải và các bước tính toán chi tiết của một học sinh xuất sắc để đạt điểm tối đa.
+Trình bày các bước logic, sử dụng thuật ngữ toán học chuẩn mực (ví dụ: quy đồng mẫu số, hàng phần mười), và giải thích ngắn gọn tại sao lại làm như vậy.
+Giữ giọng văn tích cực, dễ học tập theo. Sử dụng định dạng in đậm và LaTeX (ví dụ: \\frac{a}{b}) cho các công thức.
+Định dạng như sau:
+🏆 **Bài giải mẫu của Học sinh Giỏi:**
+- **Bước 1:** [Tiêu đề bước và chi tiết thực hiện]
+- **Bước 2:** [Tiêu đề bước và chi tiết thực hiện]
+- **Kết luận:** [Nêu đáp số rõ ràng]
+💡 **Mẹo trình bày bài thi:** [Giải thích mẹo viết lời giải hoặc cách soát lỗi]`;
+
+            const userPrompt = language === 'en' ?
+              `Generate an excellent student model solution for:
+- Topic: ${question.topic}
+- Question: "${getLangText(question.questionText)}"
+- Expected Answer: "${getLangText(question.correctAnswer)}"
+- Hint: "${getLangText(question.hint)}"
+- Thinking Skill: ${question.thinkingSkill}`
+              :
+              `Hãy viết bài giải mẫu của học sinh giỏi cho bài toán sau:
+- Chủ đề: ${question.topic}
+- Đề bài: "${getLangText(question.questionText)}"
+- Đáp số đúng: "${getLangText(question.correctAnswer)}"
+- Gợi ý: "${getLangText(question.hint)}"
+- Kỹ năng tư duy: ${question.thinkingSkill}`;
+
+            let targetModel = selectedModel;
+            if (targetModel.includes('gemini-3-flash')) targetModel = 'gemini-2.5-flash';
+            if (targetModel.includes('gemini-3-pro')) targetModel = 'gemini-2.5-pro';
+
+            const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { temperature: 0.5 }
+              })
+            });
+
+            if (!googleResponse.ok) {
+              throw new Error(`Google API status ${googleResponse.status}`);
+            }
+
+            const googleData = await googleResponse.json();
+            responseText = googleData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            clientFallbackSuccess = true;
+          } catch (googleErr) {
+            console.warn("Direct Google API model solution call failed. Falling back to offline mode.", googleErr);
+          }
+        }
+
+        if (!clientFallbackSuccess) {
+          responseText = language === 'en' ?
+            `🏆 **Perfect Student Solution (Offline Mode):**
+- **Step 1:** Identify the key parameters: topic is ${question.topic}. The problem asks: "${getLangText(question.questionText)}".
+- **Step 2:** Apply the standard calculation. Since the correct answer is "${getLangText(question.correctAnswer)}", we verify it step-by-step using the hint: "${getLangText(question.hint)}".
+- **Final Answer:** The answer is "${getLangText(question.correctAnswer)}".
+💡 **Pro Writing Tip:** Double check your decimal point positions or fractions scaling before submitting!`
+            :
+            `🏆 **Bài giải mẫu của Học sinh Giỏi (Chế độ Ngoại tuyến):**
+- **Bước 1:** Phân tích dữ kiện đề bài: Chủ đề ${question.topic}. Đề bài yêu cầu: "${getLangText(question.questionText)}".
+- **Bước 2:** Thực hiện phép tính. Dựa trên đáp án đúng là "${getLangText(question.correctAnswer)}", quy đổi hoặc tính toán theo gợi ý: "${getLangText(question.hint)}".
+- **Kết luận:** Đáp án chính xác là "${getLangText(question.correctAnswer)}".
+💡 **Mẹo trình bày bài thi:** Luôn kiểm tra lại cách rút gọn phân số hoặc vị trí của dấu phẩy số thập phân trước khi kết luận!`;
+        }
       }
 
-      const data = await response.json();
-      setModelSolutionText(data.text);
+      setModelSolutionText(responseText);
     } catch (err: any) {
       console.error(err);
       setSolutionError(err.message || 'Unknown error');
@@ -163,37 +258,135 @@ export default function AICoachModal({
       const apiKey = localStorage.getItem('gemini_api_key') || '';
       const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
 
-      const response = await fetch('/api/gemini/tutor', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'x-gemini-model': selectedModel
-        },
-        body: JSON.stringify({
-          questionText: getLangText(question.questionText),
-          correctAnswer: getLangText(question.correctAnswer),
-          studentAnswer: studentAnswer,
-          hint: getLangText(question.hint),
-          commonMistake: getLangText(question.commonMistake),
-          thinkingSkill: question.thinkingSkill,
-          topic: question.topic,
-          history: historyContext,
-          chosenLanguage: language // Send active language state to backend
-        })
-      });
+      let responseText = '';
+      try {
+        const response = await fetch('/api/gemini/tutor', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'x-gemini-model': selectedModel
+          },
+          body: JSON.stringify({
+            questionText: getLangText(question.questionText),
+            correctAnswer: getLangText(question.correctAnswer),
+            studentAnswer: studentAnswer,
+            hint: getLangText(question.hint),
+            commonMistake: getLangText(question.commonMistake),
+            thinkingSkill: question.thinkingSkill,
+            topic: question.topic,
+            history: historyContext,
+            chosenLanguage: language
+          })
+        });
 
-      if (response.status !== 200) {
-        const errData = await response.json();
-        throw new Error(errData.error || `HTTP ${response.status}`);
+        if (response.status !== 200) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        responseText = data.text;
+      } catch (backendErr) {
+        console.warn("Backend API call failed for tutor, attempting direct Gemini client-side call:", backendErr);
+        
+        let clientFallbackSuccess = false;
+
+        const isValidGeminiKey = (key: string | null | undefined): boolean => {
+          if (!key) return false;
+          const k = key.trim();
+          return k.startsWith("AIzaSy") && k.length > 15;
+        };
+
+        if (isValidGeminiKey(apiKey)) {
+          try {
+            const systemPrompt = language === 'en' ? 
+              `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary Mathematics.
+Your pedagogical philosophy is Socrates' method:
+1. NEVER reveal the final correct answer under any circumstances.
+2. ALWAYS respond warmly and encouragingly in English.
+3. If the student made a mistake, analyze their work (student input: "${studentAnswer}", expected: "${getLangText(question.correctAnswer)}", common mistake: "${getLangText(question.commonMistake)}"). Do not criticize; ask leading, scaffolded, bite-sized questions in English to guide them.
+4. Promote "${question.thinkingSkill}" thinking skills (Thinking and Working Mathematically - TWM).
+5. Give clues related to the hint: "${getLangText(question.hint)}".
+6. Make them verify their calculations. Be concise, friendly, and highly engaging for 11-year-olds. Do not write extremely long explanations. Keep comments down to 3-4 simple sentences maximum per turn.` 
+              : 
+              `You are an veteran EdTech AI Math Coach for Grade 6 students studying Cambridge Primary Mathematics.
+Your pedagogical philosophy is Socrates' method:
+1. NEVER reveal the final correct answer under any circumstances.
+2. ALWAYS respond warmly and encouragingly in Vietnamese.
+3. If the student made a mistake, analyze their work (student input: "${studentAnswer}", expected: "${getLangText(question.correctAnswer)}", common mistake: "${getLangText(question.commonMistake)}"). Do not say they are bad; ask leading, scaffolded, bite-sized questions in Vietnamese to guide them.
+4. Promote "${question.thinkingSkill}" thinking skills (Tư duy và Làm việc theo Toán học - TWM).
+5. Give clues related to the hint: "${getLangText(question.hint)}".
+6. Make them verify their calculations. Be concise, cozy, and highly engaging for 11-year-olds. Do not write extremely long explanations. Keep comments down to 3-4 simple sentences maximum per turn.`;
+
+            const userPrompt = language === 'en' ? 
+              `I am working on the question: "${getLangText(question.questionText)}". 
+My answer is "${studentAnswer}", but the expected answer is "${getLangText(question.correctAnswer)}". 
+The hint is: "${getLangText(question.hint)}".
+The common mistake is: "${getLangText(question.commonMistake)}".
+Ask me a leading question to activate my "${question.thinkingSkill}" thinking skill so I can calculate it again, without giving me the correct answer!` 
+              : 
+              `Em đang làm câu: "${getLangText(question.questionText)}". 
+Đáp án đúng là "${getLangText(question.correctAnswer)}" nhưng em ghi đáp án là: "${studentAnswer}". 
+Gợi ý cho câu này là: "${getLangText(question.hint)}". 
+Hành vi lỗi thường gặp là: "${getLangText(question.commonMistake)}".
+Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${question.thinkingSkill}" để em tự tính lại mà không cho em biết đáp án đúng!`;
+
+            let targetModel = selectedModel;
+            if (targetModel.includes('gemini-3-flash')) targetModel = 'gemini-2.5-flash';
+            if (targetModel.includes('gemini-3-pro')) targetModel = 'gemini-2.5-pro';
+
+            // Filter out welcome message or any leading model message from Gemini history
+            const filteredHistory = historyContext.map(h => ({
+              role: h.role === 'user' ? 'user' : 'model',
+              parts: [{ text: h.text }]
+            }));
+            
+            while (filteredHistory.length > 0 && filteredHistory[0].role === 'model') {
+              filteredHistory.shift();
+            }
+
+            const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [
+                  ...filteredHistory,
+                  { role: 'user', parts: [{ text: userPrompt }] }
+                ],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { temperature: 0.6 }
+              })
+            });
+
+            if (!googleResponse.ok) {
+              throw new Error(`Google API status ${googleResponse.status}`);
+            }
+
+            const googleData = await googleResponse.json();
+            responseText = googleData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            clientFallbackSuccess = true;
+          } catch (googleErr) {
+            console.warn("Direct Google API Socratic coach call failed. Falling back to offline dialogue.", googleErr);
+          }
+        }
+
+        if (!clientFallbackSuccess) {
+          if (language === 'en') {
+            responseText = historyContext.length === 0
+              ? `Hello! I see you entered **"${studentAnswer}"** for the question on **${question.topic}**. \nLet me give you a clue: This question tests your **${question.thinkingSkill}** skills. Remember: *${getLangText(question.hint)}*. \nCould it be that you made this common error: *${getLangText(question.commonMistake)}*? Try checking your calculation steps again!`
+              : `Keep going! I'm here to guide your mathematical thinking. \n*Hint:* Analyze the decimal place movement or check your fractions common denominator. I know you can self-correct and solve it! Enter a new calculation result to try again.`;
+          } else {
+            responseText = historyContext.length === 0
+              ? `Chào em! Thầy cô thấy em trả lời là **"${studentAnswer}"** cho câu hỏi về **${question.topic}**. \nGợi ý một chút nhé: Câu này đòi hỏi kỹ năng **${question.thinkingSkill}**. Em hãy nhớ lại: *${getLangText(question.hint)}*. \nCó phải em đang gặp vướng mắc ở lỗi này không: *${getLangText(question.commonMistake)}*? Em hãy thử kiểm tra lại phép tính của mình nhé!`
+              : `Cố gắng lên em! Thầy cô ở đây để giúp em tư duy độc lập. Hãy đọc kỹ phần giải thích quy tắc học tập: \n*Gợi ý:* Hãy phân tích kỹ tử số và mẫu số hoặc xem dấu phẩy thập phân dịch chuyển mấy vị trí. Thầy cô tin em tự tìm ra lỗi sai và giải lại được! Em hãy thử nhập đáp án mới sau khi tính lại xem sao?`;
+          }
+        }
       }
 
-      const data = await response.json();
-      
       const coachMsg: Message = {
         id: Math.random().toString(),
         role: 'model',
-        text: data.text || (language === 'vi' 
+        text: responseText || (language === 'vi' 
           ? "Cô đang xem phép tính của em... Em có muốn kiểm tra lại vị trí dấu thập phân hoặc chia nhỏ tỉ lệ không?"
           : "I'm checking your calculation... Would you like to re-verify the decimal place value or check the scaling factor?"),
         timestamp: new Date()
