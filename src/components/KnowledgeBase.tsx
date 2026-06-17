@@ -114,12 +114,12 @@ export default function KnowledgeBase() {
       return;
     }
 
-    // Max file size: 50MB
-    const maxSize = 50 * 1024 * 1024;
+    // Max file size: 150MB
+    const maxSize = 150 * 1024 * 1024;
     if (file.size > maxSize) {
       setErrorText(language === 'vi' 
-        ? 'Kích thước file vượt quá 50MB. Vui lòng chọn file nhỏ hơn.' 
-        : 'File size exceeds 50MB. Please select a smaller file.');
+        ? 'Kích thước file vượt quá 150MB. Vui lòng chọn file nhỏ hơn.' 
+        : 'File size exceeds 150MB. Please select a smaller file.');
       return;
     }
 
@@ -129,10 +129,10 @@ export default function KnowledgeBase() {
         // Extract using pdfjs-dist utility
         const result = await extractTextFromPDF(file);
         
-        if (result.pageCount > 100) {
+        if (result.pageCount > 400) {
           setErrorText(language === 'vi'
-            ? 'Tài liệu vượt quá 100 trang. Vui lòng chia nhỏ file.'
-            : 'Document exceeds 100 pages. Please split the file.');
+            ? 'Tài liệu vượt quá 400 trang. Vui lòng chọn file nhỏ hơn.'
+            : 'Document exceeds 400 pages. Please select a smaller file.');
           setIsProcessingFile(false);
           return;
         }

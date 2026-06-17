@@ -85,7 +85,7 @@ const TRANSLATIONS: TranslationDict = {
   knowledgeBaseMode: { en: 'AI Knowledge Base', vi: 'Kho Kiến Thức AI' },
   uploadSectionTitle: { en: 'Study Materials', vi: 'Tài Liệu Đã Tải Lên' },
   uploadPlaceholder: { en: 'Drag and drop files here, or click to browse. Supports PDF & TXT.', vi: 'Kéo thả tài liệu vào đây hoặc bấm để chọn. Hỗ trợ file PDF & TXT.' },
-  fileLimitWarning: { en: 'Supports files up to 50MB and 100 pages.', vi: 'Hỗ trợ file tối đa 50MB và 100 trang.' },
+  fileLimitWarning: { en: 'Supports files up to 150MB and 400 pages.', vi: 'Hỗ trợ file tối đa 150MB và 400 trang.' },
   docUploaded: { en: 'Uploaded', vi: 'Tải lên lúc' },
   docPages: { en: 'pages', vi: 'trang' },
   noDocuments: { en: 'No documents uploaded yet. Upload materials to start chat.', vi: 'Chưa có tài liệu nào được tải lên. Hãy tải tài liệu để bắt đầu học nhé.' },
