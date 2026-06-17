@@ -102,6 +102,29 @@ async function generateContentWithFallback(
   throw lastError || new Error("All models in the fallback queue failed to generate content.");
 }
 
+// Helper to execute Python scripts using uv (with global or local path fallback)
+function executeUvCommand(
+  scriptName: string,
+  args: string[],
+  options: { env?: any } = {},
+  callback: (error: any, stdout: string, stderr: string) => void
+) {
+  const directCmd = `uv run ${scriptName} ${args.map(arg => arg.includes(' ') && !arg.startsWith('"') ? `"${arg}"` : arg).join(' ')}`;
+  console.log(`[UV Exec] Attempting direct command: ${directCmd}`);
+  
+  exec(directCmd, options, (error, stdout, stderr) => {
+    if (error) {
+      console.warn(`[UV Exec] Direct "uv" command failed: ${error.message}. Trying hardcoded user fallback path...`);
+      const fallbackPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
+      const fallbackCmd = `"${fallbackPath}" run ${scriptName} ${args.map(arg => arg.includes(' ') && !arg.startsWith('"') ? `"${arg}"` : arg).join(' ')}`;
+      console.log(`[UV Exec] Attempting fallback command: ${fallbackCmd}`);
+      exec(fallbackCmd, options, callback);
+    } else {
+      callback(null, stdout, stderr);
+    }
+  });
+}
+
 // Health status endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
@@ -119,13 +142,8 @@ app.get('/api/export/docx', (req: express.Request, res: express.Response) => {
     fs.mkdirSync(exportDir, { recursive: true });
   }
 
-  const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
-  const command = `"${uvPath}" run generate_docx.py ${studentId} ${lang} "${filePath}"`;
-
-  console.log(`[DOCX] Executing command: ${command}`);
-
   const apiKeyStr = (apiKey as string) || process.env.GEMINI_API_KEY || '';
-  exec(command, { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
+  executeUvCommand('generate_docx.py', [studentId as string, lang as string, filePath], { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
     if (error) {
       console.error(`[DOCX] Generation error: ${error.message}`);
       console.error(`stderr: ${stderr}`);
@@ -157,13 +175,8 @@ app.get('/api/export/pptx', (req: express.Request, res: express.Response) => {
     fs.mkdirSync(exportDir, { recursive: true });
   }
 
-  const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
-  const command = `"${uvPath}" run generate_pptx.py ${studentId} ${lang} "${filePath}"`;
-
-  console.log(`[PPTX] Executing command: ${command}`);
-
   const apiKeyStr = (apiKey as string) || process.env.GEMINI_API_KEY || '';
-  exec(command, { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
+  executeUvCommand('generate_pptx.py', [studentId as string, lang as string, filePath], { env: { ...process.env, GEMINI_API_KEY: apiKeyStr } }, (error, stdout, stderr) => {
     if (error) {
       console.error(`[PPTX] Generation error: ${error.message}`);
       console.error(`stderr: ${stderr}`);
@@ -610,12 +623,7 @@ app.post('/api/textbook/extract', async (req: express.Request, res: express.Resp
     const pdfName = mapping.vol === 1 ? "Stage 6_LB_Vol 1 (1).pdf" : "Stage 6_LB_Vol 2.pdf";
     const pdfPath = path.join(process.cwd(), pdfName);
 
-    const uvPath = `C:\\Users\\Hoang Trung Hieu\\.local\\bin\\uv.exe`;
-    const command = `"${uvPath}" run extract_pages.py "${pdfPath}" ${mapping.start} ${mapping.end}`;
-
-    console.log(`[Textbook Extract] Executing: ${command}`);
-
-    exec(command, (error, stdout, stderr) => {
+    executeUvCommand('extract_pages.py', [pdfPath, String(mapping.start), String(mapping.end)], {}, (error, stdout, stderr) => {
       if (error) {
         console.error(`[Textbook Extract] Error: ${error.message}`);
         res.status(500).json({ error: "Failed to extract PDF contents", details: error.message });

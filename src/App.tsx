@@ -10,6 +10,7 @@ import TeacherMetrics from './components/TeacherMetrics';
 import KnowledgeBase from './components/KnowledgeBase';
 import AICoachModal from './components/AICoachModal';
 import SettingsModal from './components/SettingsModal';
+import FloatingKnowledgeBase from './components/FloatingKnowledgeBase';
 import { storageProvider } from './lib/firebase';
 import { LanguageProvider, useLanguage } from './lib/LanguageContext';
 import { 
@@ -320,6 +321,9 @@ function AppContent() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Dictionary Q&A Assistant */}
+      <FloatingKnowledgeBase />
 
     </div>
   );

@@ -13,7 +13,8 @@ import {
   RefreshCw,
   Clock,
   Layers,
-  BookOpen
+  BookOpen,
+  X
 } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
 import { extractTextFromPDF } from '../lib/pdfExtractor';
@@ -22,6 +23,7 @@ import {
   deleteDocument, 
   getDocumentsMetadata, 
   compileContextForChat, 
+  getDocumentPageText,
   DocumentMetadata 
 } from '../lib/knowledgeStore';
 
@@ -43,6 +45,37 @@ export default function KnowledgeBase() {
   const [errorText, setErrorText] = useState('');
   const [successText, setSuccessText] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
+  
+  // Citation preview states
+  const [previewSource, setPreviewSource] = useState<{ fileName: string; pageNum?: number } | null>(null);
+  const [previewText, setPreviewText] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  
+  const handleBubbleClick = async (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const citationBtn = target.closest('.citation-btn') as HTMLElement;
+    if (!citationBtn) return;
+
+    const fileName = citationBtn.getAttribute('data-file');
+    const pageStr = citationBtn.getAttribute('data-page');
+    if (!fileName) return;
+
+    const pageNum = pageStr ? parseInt(pageStr, 10) : undefined;
+    setPreviewSource({ fileName, pageNum });
+    
+    setIsLoadingPreview(true);
+    setPreviewText(null);
+    try {
+      const text = await getDocumentPageText(fileName, pageNum);
+      const isVi = language === 'vi';
+      setPreviewText(text || (isVi ? 'Không tìm thấy nội dung văn bản cho trang này.' : 'No text content found for this page.'));
+    } catch (err) {
+      console.error(err);
+      setPreviewText(language === 'vi' ? 'Lỗi khi tải nội dung nguồn.' : 'Error loading source content.');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -400,9 +433,13 @@ HƯỚNG DẪN DÀNG CHO BẠN:
     });
 
     // 4. Parse citations [📄 filename, page X] or [📄 filename]
-    html = html.replace(/\[📄\s*(.*?),?\s*(?:page|trang)?\s*(\d+)?\]/gi, (_, filename, page) => {
+    html = html.replace(/\[📄\s*(.*?)(?:,?\s*(?:page|trang|p\.?|trang:|page:)?\s*(\d+))?\]/gi, (_, filename, page) => {
+      let cleanFilename = filename.trim();
+      if (cleanFilename.endsWith(',')) {
+        cleanFilename = cleanFilename.slice(0, -1).trim();
+      }
       const pageInfo = page ? `, p.${page}` : '';
-      return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold border border-indigo-200/50 shadow-sm ml-1 select-none pointer-events-none hover:bg-indigo-200 transition-colors" title="${filename}">📄 ${filename.substring(0, 15)}${filename.length > 15 ? '...' : ''}${pageInfo}</span>`;
+      return `<button type="button" class="citation-btn inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300 dark:hover:bg-indigo-900 text-[10px] font-bold border border-indigo-200/50 hover:border-indigo-350 shadow-3xs cursor-pointer transition-all active:scale-95" data-file="${cleanFilename}" data-page="${page || ''}">📄 ${cleanFilename.substring(0, 15)}${cleanFilename.length > 15 ? '...' : ''}${pageInfo} <span class="text-[8px] bg-indigo-250 dark:bg-indigo-800 text-indigo-850 px-1 rounded-full"><kbd class="font-sans">click</kbd></span></button>`;
     });
 
     // 5. Parse bold markdown **text**
@@ -433,7 +470,7 @@ HƯỚNG DẪN DÀNG CHO BẠN:
       listHtml += '</ul>';
     }
 
-    return <div dangerouslySetInnerHTML={{ __html: listHtml }} className="space-y-1.5 break-words text-sm leading-relaxed" />;
+    return <div dangerouslySetInnerHTML={{ __html: listHtml }} onClick={handleBubbleClick} className="space-y-1.5 break-words text-sm leading-relaxed" />;
   };
 
   // Helper stats
@@ -699,6 +736,42 @@ HƯỚNG DẪN DÀNG CHO BẠN:
             )}
             
             <div ref={messagesEndRef} />
+
+            {/* Citation preview overlay */}
+            <AnimatePresence>
+              {previewSource && (
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  className="absolute inset-y-0 right-0 w-full md:w-96 bg-slate-900 text-slate-100 z-10 border-l border-slate-800 shadow-2xl flex flex-col p-4"
+                >
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div className="flex items-center gap-1.5 text-xs text-indigo-400 font-bold truncate pr-4">
+                      <span className="truncate" title={previewSource.fileName}>{previewSource.fileName}</span>
+                      {previewSource.pageNum && <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-350">p. {previewSource.pageNum}</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewSource(null)}
+                      className="rounded-lg p-1 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto text-xs leading-relaxed font-mono whitespace-pre-line bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-300">
+                    {isLoadingPreview ? (
+                      <div className="flex flex-col items-center justify-center h-full py-8 space-y-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent" />
+                        <span className="text-slate-500 text-[10px] font-sans">{language === 'vi' ? 'Đang trích xuất đoạn văn...' : 'Extracting document page...'}</span>
+                      </div>
+                    ) : (
+                      previewText
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Quick suggestions bar */}

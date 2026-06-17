@@ -166,3 +166,20 @@ export async function compileContextForChat(): Promise<string> {
 
   return fullContext;
 }
+
+// Get specific page text by document name and page number for citation previewing
+export async function getDocumentPageText(
+  fileName: string, 
+  pageNum: number | null | undefined
+): Promise<string | null> {
+  const docs = getDocumentsMetadata();
+  const matchedDoc = docs.find((doc) => doc.fileName === fileName);
+  if (!matchedDoc) return null;
+  const pages = await getDocumentPages(matchedDoc.id);
+  if (pageNum) {
+    const matchedPage = pages.find((p) => p.pageNum === pageNum);
+    return matchedPage ? matchedPage.text : null;
+  }
+  return pages.map(p => p.text).join('\n');
+}
+

@@ -21,7 +21,8 @@ import {
   PenTool, 
   Bot, 
   Award,
-  RefreshCw
+  RefreshCw,
+  X
 } from 'lucide-react';
 import { Unit, Lesson, Question, QuestionDifficulty, StudentProfile } from '../types';
 import { BADGE_LIBRARY, GamificationService } from '../lib/gamification';
@@ -30,6 +31,31 @@ import GeometrySandbox from './GeometrySandbox';
 import MathRunnerGame from './MathRunnerGame';
 import { formatMathText } from '../lib/mathFormatter';
 import QuestionVisualizer from './QuestionVisualizer';
+import { getDocumentsMetadata, getDocumentPageText } from '../lib/knowledgeStore';
+
+const LESSON_PDF_MAPPING: Record<string, { vol: 1 | 2; start: number; end: number; topic: string }> = {
+  lesson_1: { vol: 1, start: 49, end: 62, topic: "Place value tenths, hundredths, thousandths" },
+  lesson_2: { vol: 1, start: 36, end: 48, topic: "Rounding decimals" },
+  lesson_3: { vol: 1, start: 63, end: 83, topic: "Equivalent fractions and comparing fractions" },
+  lesson_4: { vol: 1, start: 84, end: 97, topic: "Fractions, decimals and percentages" },
+  lesson_5: { vol: 2, start: 164, end: 175, topic: "Ratio and proportion" },
+  lesson_6: { vol: 2, start: 229, end: 252, topic: "Coordinate transformations, tịnh tiến, đối xứng, quay" },
+  lesson_7: { vol: 2, start: 223, end: 228, topic: "Rotational symmetry, đối xứng quay" },
+  lesson_8: { vol: 1, start: 10, end: 19, topic: "Counting and sequences, phép đếm và dãy số" },
+  lesson_9: { vol: 1, start: 20, end: 35, topic: "Special numbers, prime numbers, squares, cubes" },
+  lesson_10: { vol: 2, start: 133, end: 146, topic: "Positive and negative integers, số nguyên âm" },
+  lesson_11: { vol: 1, start: 114, end: 122, topic: "Adding and subtracting decimals, cộng trừ số thập phân" },
+  lesson_12: { vol: 2, start: 147, end: 163, topic: "Quadrilaterals and circles, hình tứ giác và hình tròn" },
+  lesson_13: { vol: 1, start: 98, end: 113, topic: "Exploring measures, rectangles area and time" },
+  lesson_14: { vol: 1, start: 123, end: 132, topic: "Mode, median, mean and range statistics" },
+  lesson_15: { vol: 1, start: 123, end: 132, topic: "Probability scales, mô tả và dự đoán xác suất" },
+  lesson_16: { vol: 2, start: 133, end: 146, topic: "Multiplication and division, phép nhân và phép chia" },
+  lesson_17: { vol: 2, start: 191, end: 202, topic: "Multiplying and dividing fractions and decimals" },
+  lesson_18: { vol: 2, start: 223, end: 228, topic: "The laws of arithmetic, các tính chất số học" },
+  lesson_19: { vol: 2, start: 147, end: 163, topic: "3D shapes and nets, hình trải phẳng của hình khối" },
+  lesson_20: { vol: 2, start: 176, end: 190, topic: "Angles in a triangle, đo và tính các góc" },
+  lesson_21: { vol: 2, start: 203, end: 222, topic: "Frequency diagrams, line graphs and data" }
+};
 
 interface StudentPathsProps {
   units: Unit[];
@@ -101,6 +127,10 @@ export default function StudentPaths({
   const [isExtractingTextbook, setIsExtractingTextbook] = useState(false);
   const [textbookError, setTextbookError] = useState('');
 
+  // Curriculum & Objectives Modal States
+  const [isCurriculumModalOpen, setIsCurriculumModalOpen] = useState(false);
+  const [curriculumTab, setCurriculumTab] = useState<'core' | 'map'>('core');
+
   // Sync state whenever lesson changes
   useEffect(() => {
     setQuestionIndex(0);
@@ -128,6 +158,98 @@ export default function StudentPaths({
 
     setIsExtractingTextbook(true);
     setTextbookError('');
+    
+    const mapping = LESSON_PDF_MAPPING[activeLessonId];
+    if (!mapping) {
+      setIsExtractingTextbook(false);
+      setTextbookError(language === 'vi' ? 'Không tìm thấy thông tin trang sách cho bài học này.' : 'No page mapping found for this lesson.');
+      return;
+    }
+
+    const targetPdfName = mapping.vol === 1 ? "Stage 6_LB_Vol 1 (1).pdf" : "Stage 6_LB_Vol 2.pdf";
+    
+    // Check if textbook exists in local IndexedDB
+    try {
+      const docs = getDocumentsMetadata();
+      const matchedDoc = docs.find(d => 
+        d.fileName.toLowerCase().includes(targetPdfName.toLowerCase()) || 
+        (mapping.vol === 1 && d.fileName.toLowerCase().includes("vol 1")) ||
+        (mapping.vol === 2 && d.fileName.toLowerCase().includes("vol 2"))
+      );
+
+      if (matchedDoc) {
+        console.log(`[Textbook Client-Side] Found matching uploaded document locally: ${matchedDoc.fileName}`);
+        let localText = '';
+        for (let pNum = mapping.start; pNum <= mapping.end; pNum++) {
+          const pageText = await getDocumentPageText(matchedDoc.fileName, pNum);
+          if (pageText) {
+            localText += `--- Page ${pNum} ---\n${pageText}\n\n`;
+          }
+        }
+
+        if (localText.trim()) {
+          const apiKey = localStorage.getItem('gemini_api_key') || '';
+          if (apiKey && apiKey.trim().startsWith("AIzaSy")) {
+            try {
+              const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
+              let targetModel = selectedModel;
+              if (targetModel.includes('gemini-3-flash')) targetModel = 'gemini-2.5-flash';
+              if (targetModel.includes('gemini-3-pro')) targetModel = 'gemini-2.5-pro';
+
+              const systemPrompt = language === 'vi' ? 
+                `Bạn là giáo viên Toán lớp 6. Hãy tóm tắt nội dung thô sách giáo khoa này thành một tờ tóm tắt kiến thức ngắn gọn, dễ hiểu cho trẻ 11 tuổi bằng tiếng Việt.
+Hãy định dạng đẹp bằng markdown, dùng icon sinh động.
+Tổ chức thành 4 mục:
+🌟 **Khái niệm cốt lõi (Core Concept)**
+📝 **Quy tắc & Công thức (Rules & Formulas)**
+💡 **Ví dụ trực quan (Visual Examples)**
+🧠 **Mẹo nhớ nhanh (Memory Trick)`
+                :
+                `You are a friendly Grade 6 Math Coach. Create a kid-friendly study guide in English based on this textbook content.
+Use markdown, emojis.
+Organize into:
+🌟 **Core Concept**
+📝 **Rules & Formulas**
+💡 **Visual Examples**
+🧠 **Memory Trick`;
+
+              const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ role: 'user', parts: [{ text: `Format this content:\n\n${localText.substring(0, 10000)}` }] }],
+                  systemInstruction: { parts: [{ text: systemPrompt }] },
+                  generationConfig: { temperature: 0.3 }
+                })
+              });
+
+              if (googleResponse.ok) {
+                const googleData = await googleResponse.json();
+                const formattedText = googleData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (formattedText) {
+                  setTextbookContent(`<!-- ${activeLessonId} -->\n${formattedText}`);
+                  setIsExtractingTextbook(false);
+                  return;
+                }
+              }
+            } catch (err) {
+              console.warn("Client-side AI formatting of local textbook content failed, showing raw:", err);
+            }
+          }
+
+          const rawTextGuide = language === 'vi' 
+            ? `### 📚 TÀI LIỆU SÁCH GIÁO KHOA (${mapping.topic})\n*(Đang hiển thị nội dung trích xuất thô từ tài liệu đã nạp ở Kho Kiến Thức)*\n\n${localText}`
+            : `### 📚 TEXTBOOK REFERENCE (${mapping.topic})\n*(Displaying raw extracted text from the document loaded in your Knowledge Base)*\n\n${localText}`;
+          setTextbookContent(`<!-- ${activeLessonId} -->\n${rawTextGuide}`);
+          setIsExtractingTextbook(false);
+          return;
+        }
+      }
+    } catch (localErr) {
+      console.warn("Local IndexedDB lookup/extraction failed, trying backend:", localErr);
+    }
+
+    // Fallback: request backend server
     try {
       const apiKey = localStorage.getItem('gemini_api_key') || '';
       const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
@@ -156,16 +278,22 @@ export default function StudentPaths({
       } catch (backendErr) {
         console.warn("Backend API call failed for textbook extract, attempting static client-side fallback:", backendErr);
         responseText = language === 'vi'
-          ? `### 📚 TÀI LIỆU SÁCH GIÁO KHOA
+          ? `### 📚 TÀI LIỆU SÁCH GIÁO KHOA (${mapping.topic})
           
-*Hiện tại hệ thống không thể kết nối đến máy chủ để trích xuất dữ liệu sách giáo khoa.*
+*Không tìm thấy file "${targetPdfName}" trong Kho Kiến Thức và hệ thống không kết nối được với máy chủ để tự động tải.*
 
-**Gợi ý tự học:** Em hãy mở Sách Học Sinh (Learner's Book) liên quan đến chủ đề bài học để ôn tập lý thuyết trước nhé!`
-          : `### 📚 TEXTBOOK REFERENCE
+**Hướng dẫn cách tự khắc phục:**
+1. Em (hoặc Thầy Cô) hãy vào mục **"Kho Kiến Thức"** ở thanh menu trên đầu.
+2. Tải lên file sách giáo khoa **"${targetPdfName}"** (hoặc bất kỳ file PDF nào của học phần này).
+3. Sau khi tải lên, nút **"Đọc Sách Giáo Khoa"** này sẽ tự động phân giải các trang ${mapping.start}-${mapping.end} và hiển thị trực tiếp cho em!`
+          : `### 📚 TEXTBOOK REFERENCE (${mapping.topic})
           
-*Currently unable to connect to the server to extract textbook contents.*
+*The file "${targetPdfName}" was not found in your local Knowledge Base, and the server could not be reached.*
 
-**Self-study Tip:** Please refer to the corresponding chapter in your Learner's Book to review the mathematical concepts!`;
+**How to resolve:**
+1. Go to the **"Knowledge Base"** tab in the top header.
+2. Upload the textbook PDF file **"${targetPdfName}"** (or any PDF representing this Stage 6 volume).
+3. Once uploaded, this **"Read Textbook"** button will automatically resolve pages ${mapping.start}-${mapping.end} and display them here!`;
       }
       setTextbookContent(`<!-- ${activeLessonId} -->\n${responseText}`);
     } catch (err: any) {
@@ -174,6 +302,11 @@ export default function StudentPaths({
     } finally {
       setIsExtractingTextbook(false);
     }
+  };
+
+  const handleOpenCurriculumModal = (tab: 'core' | 'map') => {
+    setCurriculumTab(tab);
+    setIsCurriculumModalOpen(true);
   };
 
   const executeAnswerEvaluation = (submittedAns: string) => {
@@ -672,12 +805,20 @@ export default function StudentPaths({
                 >
                   <span>📚 {language === 'vi' ? 'Đọc Sách Giáo Khoa' : 'Read Textbook'}</span>
                 </button>
-                <span className="rounded-full bg-blue-100/70 border border-blue-200 px-3.5 py-1 text-[10px] font-bold text-blue-700">
+                <button
+                  type="button"
+                  onClick={() => handleOpenCurriculumModal('core')}
+                  className="rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3.5 py-1 text-[10px] font-bold text-blue-700 transition-all cursor-pointer"
+                >
                   Cambridge Core
-                </span>
-                <span className="rounded-full bg-red-100/70 border border-red-200 px-3.5 py-1 text-[10px] font-bold text-red-700">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCurriculumModal('map')}
+                  className="rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-1 text-[10px] font-bold text-rose-700 transition-all cursor-pointer"
+                >
                   Cambridge Math Map
-                </span>
+                </button>
               </div>
             </div>
 
@@ -1324,9 +1465,167 @@ export default function StudentPaths({
             <div className="border-t border-slate-100 pt-3 flex justify-end">
               <button
                 onClick={() => setIsTextbookOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center transition-colors shadow-md"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center transition-colors shadow-md cursor-pointer"
               >
                 {language === 'vi' ? 'Đã hiểu!' : 'Got it!'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Curriculum & Objectives Modal */}
+      {isCurriculumModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl flex flex-col max-h-[85vh] relative" role="dialog">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-150 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <Compass className="h-5.5 w-5.5 text-blue-600" />
+                <div>
+                  <h3 className="font-display font-bold text-slate-800 text-sm sm:text-base tracking-wide">
+                    {language === 'vi' ? 'Bản Đồ Chương Trình & Tiêu Chuẩn Cambridge' : 'Cambridge Standards & Learning Map'}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{activeLesson.code} • Stage 6 Math</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsCurriculumModalOpen(false)} 
+                className="text-slate-450 hover:text-slate-700 transition-colors p-1.5 rounded-xl hover:bg-slate-50 border border-slate-250 cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
+            {/* Tab Selection */}
+            <div className="flex mt-4 bg-slate-50 p-1 rounded-2xl border border-slate-150 shrink-0">
+              <button
+                type="button"
+                onClick={() => setCurriculumTab('core')}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold text-center transition-all cursor-pointer ${
+                  curriculumTab === 'core'
+                    ? 'bg-white text-blue-600 shadow-xs border border-slate-100'
+                    : 'text-slate-550 hover:text-slate-850'
+                }`}
+              >
+                🎯 Cambridge Core Standards
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurriculumTab('map')}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold text-center transition-all cursor-pointer ${
+                  curriculumTab === 'map'
+                    ? 'bg-white text-rose-600 shadow-xs border border-slate-100'
+                    : 'text-slate-550 hover:text-slate-850'
+                }`}
+              >
+                🗺️ Cambridge Math Map (Stage 6)
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto py-5 space-y-4 pr-1">
+              {curriculumTab === 'core' ? (
+                <div className="space-y-4">
+                  <div className="rounded-2xl bg-blue-50/50 border border-blue-150/50 p-4.5 shadow-3xs">
+                    <h4 className="text-xs font-bold text-blue-800 mb-3 flex items-center gap-1.5">
+                      <span>📌</span>
+                      <span>{language === 'vi' ? 'Chuẩn đầu ra & Mục tiêu học tập:' : 'Learning Objectives:'}</span>
+                    </h4>
+                    <ul className="space-y-3">
+                      {activeLesson.learningObjectives && activeLesson.learningObjectives.map((obj, oIdx) => {
+                        const isVinschool = obj.includes('VSE');
+                        return (
+                          <li key={oIdx} className="flex gap-2.5 text-xs text-slate-700 items-start">
+                            <span className={`shrink-0 text-[8.5px] font-extrabold px-2 py-0.5 rounded border mt-0.5 uppercase tracking-wide ${
+                              isVinschool 
+                                ? 'bg-red-50 text-red-600 border-red-200/60' 
+                                : 'bg-blue-50 text-blue-600 border-blue-200/60'
+                            }`}>
+                              {isVinschool ? 'Vinschool' : 'Cambridge'}
+                            </span>
+                            <span className="font-semibold leading-relaxed text-slate-750">{obj}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-150/70">
+                    <p className="font-bold text-slate-750 mb-1 flex items-center gap-1">
+                      <span>ℹ️</span>
+                      <span>{language === 'vi' ? 'Giới thiệu về Tiêu chuẩn Cambridge:' : 'About Cambridge Core Standards:'}</span>
+                    </p>
+                    {language === 'vi' 
+                      ? 'Khung chương trình Toán Tiểu học Cambridge (Cambridge Primary Mathematics) được thiết kế nhằm giúp học sinh phát triển năng lực tư duy, lập luận và giải quyết vấn đề toán học một cách có hệ thống, chuẩn bị nền tảng vững chắc cho các cấp học tiếp theo.'
+                      : 'The Cambridge Primary Mathematics curriculum framework is designed to help students think mathematically, develop deep understanding, and build problem-solving skills for future academic success.'}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-xs text-slate-500 font-bold mb-1 pl-1 flex items-center gap-1">
+                    <span>🗺️</span>
+                    <span>{language === 'vi' ? 'Lộ trình bài học trong Học phần này:' : 'Lesson Progression in this Unit:'}</span>
+                  </div>
+
+                  {/* Vertical Progression Map */}
+                  <div className="relative border-l-2 border-slate-250 pl-6 ml-4 space-y-5">
+                    {lessons.filter(l => l.unitId === activeLesson.unitId).map((l, index) => {
+                      const isCurrent = l.id === activeLesson.id;
+                      const isCompleted = student.completedLessons?.includes(l.id);
+                      return (
+                        <div key={l.id} className="relative">
+                          {/* Circle indicator */}
+                          <div className={`absolute -left-[32.5px] top-1 h-6 w-6 rounded-full flex items-center justify-center border-2 transition-all ${
+                            isCurrent
+                              ? 'bg-blue-650 border-blue-650 ring-4 ring-blue-100 text-white'
+                              : isCompleted
+                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-3xs'
+                                : 'bg-white border-slate-350 text-slate-400 shadow-3xs'
+                          }`}>
+                            {isCompleted ? (
+                              <span className="text-[9.5px] font-extrabold">✓</span>
+                            ) : (
+                              <span className="text-[9px] font-bold font-mono">{index + 1}</span>
+                            )}
+                          </div>
+
+                          <div className={`p-3.5 rounded-2xl border transition-all ${
+                            isCurrent
+                              ? 'bg-blue-50/50 border-blue-200 shadow-2xs'
+                              : 'bg-slate-50/30 border-slate-200'
+                          }`}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9.5px] font-extrabold font-mono text-slate-400 uppercase tracking-wide">{l.code}</span>
+                              {isCurrent && (
+                                <span className="bg-blue-100 text-blue-700 text-[8.5px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider scale-95">
+                                  {language === 'vi' ? 'Bạn đang học' : 'Active'}
+                                </span>
+                              )}
+                              {isCompleted && !isCurrent && (
+                                <span className="bg-emerald-100 text-emerald-700 text-[8.5px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider scale-95">
+                                  {language === 'vi' ? 'Hoàn thành' : 'Done'}
+                                </span>
+                              )}
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-750 mt-1.5 font-display">{getLangText(l.title)}</h5>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-slate-150 pt-3.5 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCurriculumModalOpen(false)}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-md cursor-pointer active:scale-95"
+              >
+                {language === 'vi' ? 'Đóng' : 'Close'}
               </button>
             </div>
           </div>
