@@ -38,25 +38,45 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const INITIAL_STUDENT: StudentProfile = {
-  id: 'student_minh',
-  name: 'Hoàng Minh',
-  classId: 'class_5a1',
-  xp: 140, // Decentered start to make progress bars visually interesting
-  level: 2,
-  badges: ['decimal_pioneer'],
-  completedLessons: ['lesson_1'],
-  completedUnits: [],
-  streakDays: 3,
-  lastActiveDate: new Date().toISOString()
-};
+const DEFAULT_STUDENTS: StudentProfile[] = [
+  {
+    id: 'student_default',
+    name: 'Học sinh mới',
+    classId: 'class_6a1',
+    xp: 0,
+    level: 1,
+    badges: [],
+    completedLessons: [],
+    completedUnits: [],
+    streakDays: 0,
+    lastActiveDate: new Date().toISOString()
+  }
+];
 
 function AppContent() {
   const { t } = useLanguage();
   const [currentMode, setCurrentMode] = useState<'student' | 'teacher' | 'knowledge'>('student');
   
   // Real-time synced core stores
-  const [student, setStudent] = useState<StudentProfile>(INITIAL_STUDENT);
+  const [students, setStudents] = useState<StudentProfile[]>(() => {
+    const saved = localStorage.getItem('math_explorer_students_list');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (_) {}
+    }
+    return DEFAULT_STUDENTS;
+  });
+
+  const [activeStudentId, setActiveStudentId] = useState<string>(() => {
+    const savedId = localStorage.getItem('math_explorer_active_student_id');
+    return savedId || (students[0]?.id || 'student_default');
+  });
+
+  // Derived active student
+  const student = students.find(s => s.id === activeStudentId) || students[0] || DEFAULT_STUDENTS[0];
+
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [mistakes, setMistakes] = useState<MistakeLog[]>([]);
   const [reflections, setReflections] = useState<ReflectionResponse[]>([]);
@@ -84,17 +104,21 @@ function AppContent() {
 
   // Load Initial Persistent State
   useEffect(() => {
-    // Seed initial demo profile locally if none exists
-    storageProvider.seedLocal('students', { 'student_minh': INITIAL_STUDENT });
-    
-    // Load student
-    const fetchProfile = async () => {
-      const stored = await storageProvider.get('students', 'student_minh');
-      if (stored) {
-        setStudent(stored);
+    // Seed storageProvider with current student if not already present
+    const seedActiveStudent = async () => {
+      const exists = await storageProvider.get('students', activeStudentId);
+      if (!exists) {
+        await storageProvider.save('students', activeStudentId, student);
+      } else {
+        // Sync student local state with storageProvider
+        setStudents(prev => {
+          const updated = prev.map(s => s.id === activeStudentId ? exists : s);
+          localStorage.setItem('math_explorer_students_list', JSON.stringify(updated));
+          return updated;
+        });
       }
     };
-
+    
     // Load attempts, mistakes, reflections
     const fetchTransactions = async () => {
       const allAttempts = await storageProvider.queryAll('attempts');
@@ -106,18 +130,26 @@ function AppContent() {
       setReflections(allReflections);
     };
 
-    fetchProfile();
+    seedActiveStudent();
     fetchTransactions();
-  }, [coachCallCount]);
+  }, [coachCallCount, activeStudentId]);
 
   // Save changes to persistent engines safely
   const handleUpdateStudent = async (updater: (prev: StudentProfile) => StudentProfile) => {
-    setStudent(prev => {
-      const updated = updater(prev);
-      // async side effect
-      storageProvider.save('students', 'student_minh', updated);
+    setStudents(prev => {
+      const updated = prev.map(s => s.id === activeStudentId ? updater(s) : s);
+      localStorage.setItem('math_explorer_students_list', JSON.stringify(updated));
+      const activeStudent = updated.find(s => s.id === activeStudentId);
+      if (activeStudent) {
+        storageProvider.save('students', activeStudent.id, activeStudent);
+      }
       return updated;
     });
+  };
+
+  const handleSetActiveStudent = (studentId: string) => {
+    setActiveStudentId(studentId);
+    localStorage.setItem('math_explorer_active_student_id', studentId);
   };
 
   const handleSaveAttempt = async (attempt: Attempt) => {
@@ -160,7 +192,8 @@ function AppContent() {
       : "Are you sure you want to reset all learning progress to start over?";
     if (confirm(confirmMsg)) {
       localStorage.clear();
-      setStudent(INITIAL_STUDENT);
+      setStudents(DEFAULT_STUDENTS);
+      setActiveStudentId(DEFAULT_STUDENTS[0].id);
       setAttempts([]);
       setMistakes([]);
       setReflections([]);
@@ -219,7 +252,17 @@ function AppContent() {
           />
         ) : currentMode === 'teacher' ? (
           <TeacherMetrics 
-            students={[student]} // standard class profile containing our student
+            students={students}
+            setStudents={(newList) => {
+              setStudents(newList);
+              localStorage.setItem('math_explorer_students_list', JSON.stringify(newList));
+              if (newList.length > 0 && !newList.some(s => s.id === activeStudentId)) {
+                setActiveStudentId(newList[0].id);
+                localStorage.setItem('math_explorer_active_student_id', newList[0].id);
+              }
+            }}
+            activeStudentId={activeStudentId}
+            onSetActiveStudent={handleSetActiveStudent}
             attempts={attempts}
             mistakes={mistakes}
           />
@@ -235,6 +278,7 @@ function AppContent() {
           onClose={() => setIsCoachOpen(false)}
           question={coachActiveQuestion}
           studentAnswer={coachActiveStudentAnswer}
+          student={student}
           onCoachMessageLogged={handleCoachMessageLogged}
         />
       )}

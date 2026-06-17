@@ -16,7 +16,7 @@ import {
   Lightbulb,
   AlertOctagon
 } from 'lucide-react';
-import { Question } from '../types';
+import { Question, StudentProfile } from '../types';
 import { useLanguage } from '../lib/LanguageContext';
 
 interface Message {
@@ -31,6 +31,7 @@ interface AICoachModalProps {
   onClose: () => void;
   question: Question;
   studentAnswer: string;
+  student: StudentProfile;
   onCoachMessageLogged?: () => void;
 }
 
@@ -39,6 +40,7 @@ export default function AICoachModal({
   onClose, 
   question, 
   studentAnswer,
+  student,
   onCoachMessageLogged 
 }: AICoachModalProps) {
   const { language, t, getLangText } = useLanguage();
@@ -58,9 +60,10 @@ export default function AICoachModal({
       setErrorText('');
       // Setup Initial Coach Message
       const isVi = language === 'vi';
+      const studentName = student?.name || (isVi ? 'Học sinh' : 'Student');
       const introText = isVi
-        ? `Chào Hoàng Minh! Thầy cô thấy em đang làm câu về bài **${question.topic}** với đáp án **"${studentAnswer}"** nhưng chưa khớp. \nĐừng lo lắng nhé! Hãy quan sát kỹ đề bài: *"${getLangText(question.questionText)}"*. \nKỹ năng liên quan đến bài này là **${question.thinkingSkill}**. Em hãy thử suy nghĩ lại xem, em đã tính toán thế nào để có đáp án đó? Có điều gì em bỏ sót không?`
-        : `Hi Hoang Minh! I see your answer is **"${studentAnswer}"** for the question about **${question.topic}**, but it doesn't match. \nDon't worry! Read the question carefully: *"${getLangText(question.questionText)}"*. \nThis question involves **${question.thinkingSkill}** skills. Can you think about how you calculated that answer? Is there something you might have missed?`;
+        ? `Chào ${studentName}! Thầy cô thấy em đang làm câu về bài **${question.topic}** với đáp án **"${studentAnswer}"** nhưng chưa khớp. \nĐừng lo lắng nhé! Hãy quan sát kỹ đề bài: *"${getLangText(question.questionText)}"*. \nKỹ năng liên quan đến bài này là **${question.thinkingSkill}**. Em hãy thử suy nghĩ lại xem, em đã tính toán thế nào để có đáp án đó? Có điều gì em bỏ sót không?`
+        : `Hi ${studentName}! I see your answer is **"${studentAnswer}"** for the question about **${question.topic}**, but it doesn't match. \nDon't worry! Read the question carefully: *"${getLangText(question.questionText)}"*. \nThis question involves **${question.thinkingSkill}** skills. Can you think about how you calculated that answer? Is there something you might have missed?`;
 
       const introMessage: Message = {
         id: 'initial_greet',
@@ -70,7 +73,7 @@ export default function AICoachModal({
       };
       setMessages([introMessage]);
     }
-  }, [isOpen, question, studentAnswer, language]);
+  }, [isOpen, question, studentAnswer, language, student]);
 
   // Reset solution tab when question changes
   useEffect(() => {

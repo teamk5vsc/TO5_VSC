@@ -217,11 +217,29 @@ export default function KnowledgeBase() {
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || `HTTP ${response.status}`);
+        let errMsg = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) {
+          try {
+            const errText = await response.text();
+            if (errText && errText.length < 200) {
+              errMsg = errText;
+            }
+          } catch (_) {}
+        }
+        throw new Error(errMsg);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error(language === 'vi' 
+          ? 'Không thể giải mã câu trả lời từ máy chủ (Phản hồi không phải JSON).' 
+          : 'Could not decode server response (Invalid JSON).');
+      }
 
       const aiMsg: Message = {
         id: `ai_${Date.now()}`,

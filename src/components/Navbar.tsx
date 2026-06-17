@@ -177,18 +177,29 @@ export default function Navbar({
           {/* User info avatar summary */}
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 p-0.5">
-              <div className={`flex h-full w-full items-center justify-center rounded-full text-sm font-bold text-white ${
-                currentMode === 'student' ? 'bg-blue-600' : 'bg-red-600'
+              <div className={`flex h-full w-full items-center justify-center rounded-full text-xs font-bold text-white ${
+                currentMode === 'student' ? (currentMode === 'knowledge' ? 'bg-indigo-600' : 'bg-blue-600') : 'bg-red-600'
               }`}>
-                {currentMode === 'student' ? 'HM' : 'TM'}
+                {currentMode === 'student' ? (() => {
+                  if (!student?.name) return 'HS';
+                  const parts = student.name.trim().split(/\s+/);
+                  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+                  const first = parts[0]?.[0] || '';
+                  const last = parts[parts.length - 1]?.[0] || '';
+                  return (first + last).toUpperCase();
+                })() : 'NM'}
               </div>
             </div>
             <div className="hidden lg:block text-left text-xs">
               <p className="font-semibold text-slate-800">
-                {currentMode === 'student' ? (language === 'vi' ? 'Hoàng Minh (Lớp 6A1)' : 'Hoang Minh (Class 6A1)') : (language === 'vi' ? 'Cô Tuyết Mai' : 'Ms. Tuyet Mai')}
+                {currentMode === 'student' 
+                  ? `${student.name} (${language === 'vi' ? 'Lớp' : 'Class'} ${student.classId ? student.classId.replace('class_', '').replace('class', '').toUpperCase() : '6A1'})` 
+                  : (language === 'vi' ? 'Cô Ngọc Mai' : 'Ms. Ngoc Mai')}
               </p>
-              <p className="text-[10px] text-slate-500">
-                {currentMode === 'student' ? 'Times City' : 'Lead Teacher'}
+              <p className="text-[10px] text-slate-500 font-medium">
+                {currentMode === 'student' 
+                  ? `${student.xp} XP` 
+                  : (language === 'vi' ? 'Giáo viên phụ trách' : 'Lead Teacher')}
               </p>
             </div>
           </div>
