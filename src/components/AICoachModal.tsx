@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Question, StudentProfile } from '../types';
 import { useLanguage } from '../lib/LanguageContext';
+import { RenderMath } from '../lib/mathFormatter';
 
 interface Message {
   id: string;
@@ -508,7 +509,7 @@ Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${
               </div>
             ) : (
               <div className="prose max-w-none text-slate-700 leading-relaxed font-medium whitespace-pre-line bg-indigo-50/30 p-4 rounded-xl border border-indigo-100">
-                {modelSolutionText}
+                <RenderMath text={modelSolutionText} className="block whitespace-pre-line" />
               </div>
             )}
           </div>
@@ -539,7 +540,7 @@ Hãy đặt cho em 1 câu hỏi gợi mở, giúp em kích hoạt kỹ năng "${
                           ? '-left-2 bg-amber-50 border-l border-t border-amber-100/70 [clip-path:polygon(100%_0,0_0,100%_100%)]' 
                           : '-right-2 bg-blue-50 border-r border-t border-blue-100/70 [clip-path:polygon(0_0,100%_0,0_100%)]'
                       }`} />
-                      <p className="whitespace-pre-line font-semibold">{msg.text}</p>
+                      <RenderMath text={msg.text} className="block whitespace-pre-line font-semibold" />
                       <p className={`mt-1.5 font-mono text-[8px] text-right ${isCoach ? 'text-amber-500' : 'text-blue-500'}`}>
                         {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>

@@ -28,6 +28,8 @@ import { BADGE_LIBRARY, GamificationService } from '../lib/gamification';
 import { useLanguage } from '../lib/LanguageContext';
 import GeometrySandbox from './GeometrySandbox';
 import MathRunnerGame from './MathRunnerGame';
+import { formatMathText } from '../lib/mathFormatter';
+import QuestionVisualizer from './QuestionVisualizer';
 
 interface StudentPathsProps {
   units: Unit[];
@@ -57,31 +59,7 @@ export default function StudentPaths({
   const { language, t, getLangText } = useLanguage();
 
   const renderFormattedText = (text: string) => {
-    if (!text) return '';
-    
-    // 1. Escape HTML
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
-    // 2. Parse inline math $...$
-    html = html.replace(/\$([^$]+)\$/g, (_, formula) => {
-      // Look for standard fraction representation e.g. "1/10"
-      if (formula.includes('/')) {
-        const parts = formula.split('/');
-        if (parts.length === 2 && !isNaN(Number(parts[0].trim())) && !isNaN(Number(parts[1].trim()))) {
-          return `<span class="inline-flex flex-col items-center justify-center font-serif text-[10px] align-middle px-0.5"><span class="border-b border-indigo-700/60 dark:border-indigo-400/60 px-1 leading-none">${parts[0].trim()}</span><span class="leading-none pt-0.5">${parts[1].trim()}</span></span>`;
-        }
-      }
-      // Standard inline math rendering
-      return `<span class="font-mono bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-150/40 font-bold text-xs inline-block mx-0.5 align-middle">${formula}</span>`;
-    });
-
-    // 3. Parse bold markdown **text**
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+    return <span dangerouslySetInnerHTML={{ __html: formatMathText(text) }} />;
   };
 
   // Navigation State
@@ -979,6 +957,12 @@ export default function StudentPaths({
                       <p className="text-slate-800 font-display font-medium text-sm leading-relaxed whitespace-pre-line pt-2">
                         {renderFormattedText(getLangText(activeQuestion.questionText))}
                       </p>
+
+                      <QuestionVisualizer 
+                        question={activeQuestion}
+                        userAnswer={userAnswer}
+                        onChangeAnswer={setUserAnswer}
+                      />
                     </div>
 
                     {/* Scratchpad drafting tool */}
