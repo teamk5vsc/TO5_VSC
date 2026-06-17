@@ -12,15 +12,16 @@ import {
   Flame, 
   TrendingUp, 
   LayoutDashboard,
-  Settings
+  Settings,
+  BookOpen
 } from 'lucide-react';
 import { StudentProfile } from '../types';
 import { GamificationService } from '../lib/gamification';
 import { useLanguage } from '../lib/LanguageContext';
 
 interface NavbarProps {
-  currentMode: 'student' | 'teacher';
-  onModeChange: (mode: 'student' | 'teacher') => void;
+  currentMode: 'student' | 'teacher' | 'knowledge';
+  onModeChange: (mode: 'student' | 'teacher' | 'knowledge') => void;
   student: StudentProfile;
   onOpenSettings: () => void;
   hasApiKey: boolean;
@@ -158,6 +159,18 @@ export default function Navbar({
             >
               <GraduationCap className="h-3.5 w-3.5" />
               <span>{language === 'vi' ? 'Giáo viên' : 'Teacher'}</span>
+            </button>
+            <button
+              onClick={() => onModeChange('knowledge')}
+              id="btn_select_knowledge_mode"
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all ${
+                currentMode === 'knowledge'
+                  ? 'bg-white text-indigo-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>{language === 'vi' ? 'Kho Kiến Thức' : 'Knowledge Base'}</span>
             </button>
           </div>
 

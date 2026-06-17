@@ -79,9 +79,33 @@ const TRANSLATIONS: TranslationDict = {
   errorProfileSubtitle: { en: 'AI-grouped class vulnerability report', vi: 'Báo cáo chẩn đoán của hệ thống dựa trên lỗ hổng kiến thức' },
   pedagogicalInterventionsTitle: { en: 'AI-Powered Pedagogical Interventions', vi: 'Đề xuất Can thiệp sư phạm (AI Interventions)' },
   pedagogicalInterventionsSubtitle: { en: 'Automated remediation plans based on class errors', vi: 'Hệ thống phân tích thông minh dựa trên rủi ro của từng lớp' },
-  priorityLabel: { en: 'Priority', vi: 'Mức độ ưu tiên' },
-  phenomenonLabel: { en: 'Phenomenon', vi: 'Hiện tượng' },
-  recommendedActionLabel: { en: 'Recommended Corrective Action', vi: 'Hành động khắc phục đề xuất' }
+  recommendedActionLabel: { en: 'Recommended Corrective Action', vi: 'Hành động khắc phục đề xuất' },
+
+  // Knowledge Base UI
+  knowledgeBaseMode: { en: 'AI Knowledge Base', vi: 'Kho Kiến Thức AI' },
+  uploadSectionTitle: { en: 'Study Materials', vi: 'Tài Liệu Đã Tải Lên' },
+  uploadPlaceholder: { en: 'Drag and drop files here, or click to browse. Supports PDF & TXT.', vi: 'Kéo thả tài liệu vào đây hoặc bấm để chọn. Hỗ trợ file PDF & TXT.' },
+  fileLimitWarning: { en: 'Supports files up to 50MB and 100 pages.', vi: 'Hỗ trợ file tối đa 50MB và 100 trang.' },
+  docUploaded: { en: 'Uploaded', vi: 'Tải lên lúc' },
+  docPages: { en: 'pages', vi: 'trang' },
+  noDocuments: { en: 'No documents uploaded yet. Upload materials to start chat.', vi: 'Chưa có tài liệu nào được tải lên. Hãy tải tài liệu để bắt đầu học nhé.' },
+  deleteDocConfirm: { en: 'Are you sure you want to delete this document?', vi: 'Em có chắc chắn muốn xóa tài liệu này không?' },
+  aiChatTitle: { en: 'Ask AI Study Assistant', vi: 'Hỏi đáp Trợ lý Học tập AI' },
+  chatWelcome: { en: 'Hello! I am your AI Study Assistant. I can help you read, summarize, and solve exercises from your uploaded documents. What would you like to know?', vi: 'Chào em! Thầy cô là Trợ lý Học tập AI. Thầy cô có thể giúp em đọc, tóm tắt và hướng dẫn giải các bài tập trong những tài liệu em đã tải lên. Em muốn hỏi điều gì nào?' },
+  kbChatPlaceholder: { en: 'Ask a question about the uploaded documents...', vi: 'Nhập câu hỏi liên quan đến tài liệu đã tải lên...' },
+  suggestSummary: { en: 'Summarize documents', vi: 'Tóm tắt nội dung tài liệu' },
+  suggestFormulas: { en: 'Extract formulas & rules', vi: 'Liệt kê các công thức & quy tắc' },
+  suggestExplain: { en: 'Explain core concepts', vi: 'Giải thích khái niệm chính' },
+  suggestQuiz: { en: 'Quiz me on materials', vi: 'Kiểm tra kiến thức của tôi' },
+  citationsLabel: { en: 'Sources:', vi: 'Nguồn tham khảo:' },
+  processingPdf: { en: 'Reading and parsing PDF pages...', vi: 'Đang đọc và phân tích các trang PDF...' },
+  extractSuccess: { en: 'Document uploaded successfully!', vi: 'Tải tài liệu và trích xuất thành công!' },
+  extractError: { en: 'Error reading file. Please check if the PDF is password-protected.', vi: 'Lỗi đọc file. Vui lòng kiểm tra file PDF có bị khóa mật khẩu không.' },
+  onlyTextAndPdf: { en: 'Please upload only PDF or TXT files.', vi: 'Vui lòng chỉ tải lên file PDF hoặc TXT.' },
+  totalStats: { en: 'Total Statistics', vi: 'Thống kê tổng quan' },
+  statsDocs: { en: 'Documents', vi: 'Tài liệu' },
+  statsPages: { en: 'Total Pages', vi: 'Tổng số trang' },
+  statsSize: { en: 'Total Size', vi: 'Tổng dung lượng' }
 };
 
 interface LanguageContextType {

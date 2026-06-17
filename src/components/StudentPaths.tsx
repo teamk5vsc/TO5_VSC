@@ -56,6 +56,34 @@ export default function StudentPaths({
 }: StudentPathsProps) {
   const { language, t, getLangText } = useLanguage();
 
+  const renderFormattedText = (text: string) => {
+    if (!text) return '';
+    
+    // 1. Escape HTML
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // 2. Parse inline math $...$
+    html = html.replace(/\$([^$]+)\$/g, (_, formula) => {
+      // Look for standard fraction representation e.g. "1/10"
+      if (formula.includes('/')) {
+        const parts = formula.split('/');
+        if (parts.length === 2 && !isNaN(Number(parts[0].trim())) && !isNaN(Number(parts[1].trim()))) {
+          return `<span class="inline-flex flex-col items-center justify-center font-serif text-[10px] align-middle px-0.5"><span class="border-b border-indigo-700/60 dark:border-indigo-400/60 px-1 leading-none">${parts[0].trim()}</span><span class="leading-none pt-0.5">${parts[1].trim()}</span></span>`;
+        }
+      }
+      // Standard inline math rendering
+      return `<span class="font-mono bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-150/40 font-bold text-xs inline-block mx-0.5 align-middle">${formula}</span>`;
+    });
+
+    // 3. Parse bold markdown **text**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  };
+
   // Navigation State
   const [activeUnitId, setActiveUnitId] = useState<string>(units[0]?.id || 'unit_1');
   const [activeLessonId, setActiveLessonId] = useState<string>('lesson_1');
@@ -676,7 +704,7 @@ export default function StudentPaths({
                     </span>
                   </div>
                   <p className="text-xs leading-relaxed text-slate-700 font-medium whitespace-pre-line">
-                    {getLangText(activeLesson.explore.scenario)}
+                    {renderFormattedText(getLangText(activeLesson.explore.scenario))}
                   </p>
                 </div>
 
@@ -685,12 +713,12 @@ export default function StudentPaths({
                     {language === 'vi' ? 'Thách thức tư duy toán:' : 'Mathematical Challenge:'}
                   </h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-semibold">
-                    {getLangText(activeLesson.explore.question)}
+                    {renderFormattedText(getLangText(activeLesson.explore.question))}
                   </p>
                   
                   {/* Step Hint */}
                   <div className="mt-4 border-l-4 border-amber-500 bg-amber-50/50 p-3 text-[11px] text-slate-700">
-                    <strong>{language === 'vi' ? 'Gợi ý ban đầu của thầy cô:' : 'Initial Teacher Hint:'}</strong> {getLangText(activeLesson.explore.initialHint)}
+                    <strong>{language === 'vi' ? 'Gợi ý ban đầu của thầy cô:' : 'Initial Teacher Hint:'}</strong> {renderFormattedText(getLangText(activeLesson.explore.initialHint))}
                   </div>
                 </div>
 
@@ -718,7 +746,7 @@ export default function StudentPaths({
                     {language === 'vi' ? 'Khung kiến thức toán học' : 'Theoretical Concepts'}
                   </h3>
                   <div className="text-slate-700 text-xs leading-relaxed whitespace-pre-line prose max-w-none">
-                    {getLangText(activeLesson.learn.content)}
+                    {renderFormattedText(getLangText(activeLesson.learn.content))}
                   </div>
                 </div>
 
@@ -748,7 +776,7 @@ export default function StudentPaths({
                     {language === 'vi' ? 'Mẫu toán chuẩn' : 'Mathematical Example'}
                   </span>
                   <h4 className="text-xs font-bold text-slate-800 leading-relaxed font-display">
-                    {getLangText(activeLesson.example.problem)}
+                    {renderFormattedText(getLangText(activeLesson.example.problem))}
                   </h4>
                 </div>
 
@@ -760,11 +788,11 @@ export default function StudentPaths({
                         {sIdx + 1}
                       </div>
                       <div className="ml-8">
-                        <p className="font-bold text-slate-800 mb-1">{getLangText(step.title)}</p>
-                        <p className="text-slate-500 text-[11px] leading-relaxed mb-2">{getLangText(step.description)}</p>
+                        <p className="font-bold text-slate-800 mb-1">{renderFormattedText(getLangText(step.title))}</p>
+                        <p className="text-slate-500 text-[11px] leading-relaxed mb-2">{renderFormattedText(getLangText(step.description))}</p>
                         {step.mathExpression && (
                           <div className="rounded-lg bg-slate-50 border border-slate-100 p-2 font-mono text-indigo-600 font-bold text-xs">
-                            {step.mathExpression}
+                            {renderFormattedText(step.mathExpression)}
                           </div>
                         )}
                       </div>
@@ -895,7 +923,7 @@ export default function StudentPaths({
                       </div>
 
                       <p className="text-slate-800 font-display font-medium text-sm leading-relaxed whitespace-pre-line pt-2">
-                        {getLangText(activeQuestion.questionText)}
+                        {renderFormattedText(getLangText(activeQuestion.questionText))}
                       </p>
                     </div>
 
@@ -1017,7 +1045,7 @@ export default function StudentPaths({
                       <Lightbulb className="h-4 w-4" />
                       {language === 'vi' ? 'Gợi ý giáo viên của em:' : 'Teacher Hint:'}
                     </p>
-                    <p>{getLangText(activeQuestion.hint)}</p>
+                    <p>{renderFormattedText(getLangText(activeQuestion.hint))}</p>
                   </motion.div>
                 )}
 
@@ -1048,15 +1076,15 @@ export default function StudentPaths({
                       {!isCurrentCorrect && (
                         <div className="rounded-xl bg-white border border-red-100 p-3.5 space-y-2 text-slate-600">
                           <p className="font-bold text-red-600">{language === 'vi' ? 'Học hỏi từ điểm sai:' : 'Learning from mistake:'}</p>
-                          <p><strong className="text-slate-800">{language === 'vi' ? 'Lỗi thường gặp:' : 'Common mistake:'}</strong> {getLangText(activeQuestion.commonMistake)}</p>
-                          <p><strong className="text-slate-800">{language === 'vi' ? 'Phương án giải khoa học:' : 'Explanation:'}</strong> {getLangText(activeQuestion.explanation)}</p>
+                          <p><strong className="text-slate-800">{language === 'vi' ? 'Lỗi thường gặp:' : 'Common mistake:'}</strong> {renderFormattedText(getLangText(activeQuestion.commonMistake))}</p>
+                          <p><strong className="text-slate-800">{language === 'vi' ? 'Phương án giải khoa học:' : 'Explanation:'}</strong> {renderFormattedText(getLangText(activeQuestion.explanation))}</p>
                         </div>
                       )}
 
                       {isCurrentCorrect && (
                         <div className="rounded-xl bg-white border border-emerald-150 p-3 text-slate-600">
                           <p className="font-bold text-emerald-700">{language === 'vi' ? 'Tư duy được phát triển:' : 'Thinking skill developed:'} {activeQuestion.thinkingSkill}</p>
-                          <p className="mt-1">{getLangText(activeQuestion.solution)}</p>
+                          <p className="mt-1">{renderFormattedText(getLangText(activeQuestion.solution))}</p>
                         </div>
                       )}
                     </div>

@@ -291,6 +291,155 @@ app.post('/api/gemini/grade-reflection', async (req: express.Request, res: expre
   }
 });
 
+// AI Knowledge Base Chat Route
+app.post('/api/gemini/knowledge-chat', async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { 
+      query, 
+      context, // Compiled text content from all uploaded docs
+      history = [], // array of { role: 'user' | 'model', text: string }
+      lang = 'vi'
+    } = req.body;
+
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+    const ai = createDynamicClient(apiKeyHeader);
+
+    // Fallback: If no Gemini API key, run local offline search
+    if (!ai) {
+      console.warn("No API key provided or dynamic client failed. Initiating offline Knowledge Base search.");
+      if (!context || context.trim() === '' || context === 'No documents uploaded yet.') {
+        const fallbackMsg = lang === 'en'
+          ? "No document context is available. Please upload documents first."
+          : "Không có dữ liệu tài liệu. Vui lòng tải lên tài liệu trước.";
+        res.json({ text: fallbackMsg, isOfflineMode: true });
+        return;
+      }
+
+      const queryWords = query.toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+        .split(/\s+/)
+        .filter((w: string) => w.length > 2); // only keep words > 2 chars
+      
+      let bestChunk = "";
+      let bestSource = "";
+      let maxMatches = 0;
+
+      // Extract sources and text contents
+      // Our context has "[Source: filename, Page: X]" format
+      const pages = context.split(/\[Source: (.*?), Page: (\d+)\]/g);
+      // pages is flat array: [pre-text, filename1, pageNum1, text1, filename2, pageNum2, text2, ...]
+      for (let idx = 1; idx < pages.length; idx += 3) {
+        const fileName = pages[idx];
+        const pageNum = pages[idx + 1];
+        const pageText = pages[idx + 2] || "";
+        if (!fileName || !pageNum) continue;
+        
+        let matches = 0;
+        queryWords.forEach((word: string) => {
+          if (pageText.toLowerCase().includes(word)) {
+            matches++;
+          }
+        });
+
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          bestChunk = pageText.trim().substring(0, 400) + "...";
+          bestSource = `[📄 ${fileName}, trang ${pageNum}]`;
+        }
+      }
+
+      let responseText = "";
+      if (maxMatches > 0) {
+        responseText = lang === 'en'
+          ? `[Offline Mode] Found matching information in documents:\n\n"${bestChunk}"\n\nSource: ${bestSource}`
+          : `[Chế độ Ngoại tuyến] Tìm thấy thông tin liên quan trong tài liệu:\n\n"${bestChunk}"\n\nNguồn: ${bestSource}`;
+      } else {
+        responseText = lang === 'en'
+          ? "I am currently offline, and I couldn't find any direct keyword matches in your uploaded documents. Please check your network connection or enter a different question."
+          : "Hiện tại hệ thống đang ngoại tuyến và không tìm thấy từ khóa trùng khớp trực tiếp trong tài liệu của em. Em vui lòng kiểm tra lại kết nối mạng hoặc thử câu hỏi khác nhé.";
+      }
+
+      res.json({ text: responseText, isOfflineMode: true });
+      return;
+    }
+
+    // Build the system prompt
+    const systemPrompt = lang === 'en'
+      ? `You are a helpful AI study assistant for Grade 5-6 students studying Cambridge Primary Mathematics.
+The student has uploaded their own study materials. Below is the full text content extracted from these materials.
+
+----------------------
+STUDENT UPLOADED MATERIALS CONTEXT:
+${context}
+----------------------
+
+YOUR INSTRUCTIONS:
+1. Answer questions ONLY based on the provided document context. Do not use external knowledge unless it is directly helpful to explain a mathematical term present in the text.
+2. If the answer cannot be found in the provided documents, state clearly: "This information is not available in the uploaded documents." or "Thông tin này không có trong tài liệu đã upload." based on the student's language.
+3. Always cite the exact source document and page number in your response in the format: [📄 filename, page X] (e.g. [📄 lesson6.pdf, page 4]). If the source is a text file with no pages, write [📄 filename].
+4. Use clear, encouraging, and age-appropriate language (suitable for 10-12 year old children).
+5. Render all mathematical expressions beautifully using standard LaTeX formatting (e.g. \\(E=mc^2\\) or \\(\\frac{1}{2}\\)) so they look premium and elegant.
+6. Respond in English.`
+      : `Bạn là trợ lý học tập AI hữu ích cho học sinh lớp 5-6 đang học môn Toán Tiểu học Cambridge (Cambridge Primary Mathematics).
+Học sinh đã tải lên tài liệu học tập của mình. Dưới đây là toàn bộ nội dung văn bản trích xuất từ tài liệu đó.
+
+----------------------
+BỐI CẢNH TÀI LIỆU HỌC SINH TẢI LÊN:
+${context}
+----------------------
+
+HƯỚNG DẪN DÀNG CHO BẠN:
+1. TRẢ LỜI CÂU HỎI CHỈ DỰA TRÊN bối cảnh tài liệu được cung cấp ở trên. Không sử dụng kiến thức bên ngoài trừ khi điều đó trực tiếp giúp giải thích thuật ngữ toán học có trong văn bản.
+2. Nếu câu trả lời không tìm thấy trong tài liệu được cung cấp, hãy nói rõ: "Thông tin này không có trong tài liệu đã upload."
+3. Luôn trích dẫn chính xác tài liệu nguồn và số trang trong câu trả lời của bạn dưới định dạng: [📄 tên_file, trang X] (ví dụ: [📄 bài_giảng.pdf, trang 4]). Nếu nguồn là file văn bản không chia trang, hãy viết [📄 tên_file].
+4. Sử dụng ngôn ngữ rõ ràng, ấm áp, khuyến khích và phù hợp với lứa tuổi học sinh lớp 5-6 (10-12 tuổi).
+5. Định dạng tất cả các công thức toán học và biểu thức bằng LaTeX tiêu chuẩn (ví dụ: \\(A = \\pi r^2\\) hoặc \\(\\frac{a}{b}\\)) để hiển thị cao cấp và đẹp mắt.
+6. Trả lời bằng tiếng Việt.`;
+
+    const contents: any[] = [];
+    
+    // Add history
+    for (const h of history) {
+      contents.push({
+        role: h.role === 'user' ? 'user' : 'model',
+        parts: [{ text: h.text }]
+      });
+    }
+
+    // Add current query as current user input
+    contents.push({
+      role: 'user',
+      parts: [{ text: query }]
+    });
+
+    console.log(`[Knowledge Chat] Sending prompt to Gemini with fallback...`);
+    const response = await generateContentWithFallback(
+      ai,
+      contents,
+      systemPrompt,
+      modelHeader,
+      0.6 // Slightly lower temperature for more factual QA
+    );
+
+    console.log("[Knowledge Chat] Response fetched from Gemini successfully.");
+    res.json({
+      text: response.text || (lang === 'en' 
+        ? "I am analyzing the documents... Please try asking your question again!" 
+        : "Thầy cô đang xem lại tài liệu một chút... Em hãy thử hỏi lại xem sao nhé!"),
+      isOfflineMode: false
+    });
+
+  } catch (error: any) {
+    console.error("Error inside Knowledge Chat AI Route:", error);
+    const isRateLimit = error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+    const status = isRateLimit ? 429 : 500;
+    res.status(status).json({
+      error: error.message || "Could not request Socratic response"
+    });
+  }
+});
+
 // AI Socratic Math Coach endpoint
 app.post('/api/gemini/tutor', async (req: express.Request, res: express.Response): Promise<void> => {
   try {

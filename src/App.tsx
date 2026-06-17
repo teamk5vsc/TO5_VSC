@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import StudentPaths from './components/StudentPaths';
 import TeacherMetrics from './components/TeacherMetrics';
+import KnowledgeBase from './components/KnowledgeBase';
 import AICoachModal from './components/AICoachModal';
 import SettingsModal from './components/SettingsModal';
 import { storageProvider } from './lib/firebase';
@@ -52,7 +53,7 @@ const INITIAL_STUDENT: StudentProfile = {
 
 function AppContent() {
   const { t } = useLanguage();
-  const [currentMode, setCurrentMode] = useState<'student' | 'teacher'>('student');
+  const [currentMode, setCurrentMode] = useState<'student' | 'teacher' | 'knowledge'>('student');
   
   // Real-time synced core stores
   const [student, setStudent] = useState<StudentProfile>(INITIAL_STUDENT);
@@ -216,12 +217,14 @@ function AppContent() {
             openAICoach={handleOpenAICoach}
             coachCallCount={coachCallCount}
           />
-        ) : (
+        ) : currentMode === 'teacher' ? (
           <TeacherMetrics 
             students={[student]} // standard class profile containing our student
             attempts={attempts}
             mistakes={mistakes}
           />
+        ) : (
+          <KnowledgeBase />
         )}
       </main>
 
