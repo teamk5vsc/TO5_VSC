@@ -84,6 +84,7 @@ function AppContent() {
   // Dynamic Gemini API configuration states
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
   const [selectedModel, setSelectedModel] = useState<string>(() => localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview');
+  const [teacherName, setTeacherName] = useState<string>(() => localStorage.getItem('math_explorer_teacher_name') || 'Cô Ngọc Mai');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Socratic Modal Controls
@@ -178,11 +179,13 @@ function AppContent() {
     setCoachCallCount(prev => prev + 1);
   };
 
-  const handleSaveSettings = (key: string, model: string) => {
+  const handleSaveSettings = (key: string, model: string, name: string) => {
     localStorage.setItem('gemini_api_key', key);
     localStorage.setItem('gemini_selected_model', model);
+    localStorage.setItem('math_explorer_teacher_name', name);
     setApiKey(key);
     setSelectedModel(model);
+    setTeacherName(name);
   };
 
   const handleResetData = () => {
@@ -233,6 +236,7 @@ function AppContent() {
         student={student}
         onOpenSettings={() => setIsSettingsOpen(true)}
         hasApiKey={!!apiKey}
+        teacherName={teacherName}
       />
 
       {/* Main Core Workspaces */}
@@ -289,6 +293,7 @@ function AppContent() {
         onClose={() => setIsSettingsOpen(false)}
         apiKey={apiKey}
         selectedModel={selectedModel}
+        teacherName={teacherName}
         onSave={handleSaveSettings}
         isMandatory={!apiKey}
       />

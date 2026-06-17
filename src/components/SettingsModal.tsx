@@ -11,8 +11,9 @@ interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   apiKey: string;
-  onSave: (key: string, model: string) => void;
+  onSave: (key: string, model: string, teacherName: string) => void;
   selectedModel: string;
+  teacherName: string;
   isMandatory?: boolean;
 }
 
@@ -22,11 +23,13 @@ export default function SettingsModal({
   apiKey: initialApiKey,
   onSave,
   selectedModel: initialModel,
+  teacherName: initialTeacherName,
   isMandatory = false
 }: SettingsModalProps) {
   const { language } = useLanguage();
   const [keyInput, setKeyInput] = useState<string>(initialApiKey);
   const [modelSelect, setModelSelect] = useState<string>(initialModel || 'gemini-3-flash-preview');
+  const [teacherNameInput, setTeacherNameInput] = useState<string>(initialTeacherName || 'Cô Ngọc Mai');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   if (!isOpen) return null;
@@ -43,7 +46,7 @@ export default function SettingsModal({
     }
     
     setErrorMsg('');
-    onSave(keyInput.trim(), modelSelect);
+    onSave(keyInput.trim(), modelSelect, teacherNameInput.trim() || 'Cô Ngọc Mai');
     onClose();
   };
 
@@ -139,12 +142,26 @@ export default function SettingsModal({
             </div>
           </div>
 
+          {/* Teacher Name Section */}
+          <div className="space-y-2">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              {language === 'vi' ? '2. Tên hiển thị của Giáo viên' : '2. Display Name of Teacher'}
+            </label>
+            <input
+              type="text"
+              value={teacherNameInput}
+              onChange={(e) => setTeacherNameInput(e.target.value)}
+              placeholder={language === 'vi' ? 'Cô Ngọc Mai' : 'Ms. Ngoc Mai'}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-xs focus:border-indigo-500 focus:bg-white focus:outline-none"
+            />
+          </div>
+
           {/* API key section */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                 <Key className="h-3 w-3 text-slate-400" />
-                {language === 'vi' ? '2. Nhập Gemini API Key' : '2. Enter Gemini API Key'}
+                {language === 'vi' ? '3. Nhập Gemini API Key' : '3. Enter Gemini API Key'}
               </label>
               <a 
                 href="https://aistudio.google.com/api-keys" 

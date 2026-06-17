@@ -25,6 +25,7 @@ interface NavbarProps {
   student: StudentProfile;
   onOpenSettings: () => void;
   hasApiKey: boolean;
+  teacherName: string;
 }
 
 export default function Navbar({ 
@@ -32,7 +33,8 @@ export default function Navbar({
   onModeChange, 
   student, 
   onOpenSettings, 
-  hasApiKey 
+  hasApiKey,
+  teacherName
 }: NavbarProps) {
   const { language, setLanguage, t } = useLanguage();
   const currentLevel = GamificationService.calculateLevel(student.xp);
@@ -187,14 +189,21 @@ export default function Navbar({
                   const first = parts[0]?.[0] || '';
                   const last = parts[parts.length - 1]?.[0] || '';
                   return (first + last).toUpperCase();
-                })() : 'NM'}
+                })() : (() => {
+                  if (!teacherName) return 'NM';
+                  const parts = teacherName.trim().split(/\s+/);
+                  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+                  const first = parts[0]?.[0] || '';
+                  const last = parts[parts.length - 1]?.[0] || '';
+                  return (first + last).toUpperCase();
+                })()}
               </div>
             </div>
             <div className="hidden lg:block text-left text-xs">
               <p className="font-semibold text-slate-800">
                 {currentMode === 'student' 
                   ? `${student.name} (${language === 'vi' ? 'Lớp' : 'Class'} ${student.classId ? student.classId.replace('class_', '').replace('class', '').toUpperCase() : '6A1'})` 
-                  : (language === 'vi' ? 'Cô Ngọc Mai' : 'Ms. Ngoc Mai')}
+                  : teacherName}
               </p>
               <p className="text-[10px] text-slate-500 font-medium">
                 {currentMode === 'student' 
