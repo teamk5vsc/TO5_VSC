@@ -780,6 +780,85 @@ app.post('/api/gemini/model-solution', async (req: express.Request, res: express
   }
 });
 
+// AI Teaching Activities and Lesson Plan generator route
+app.post('/api/gemini/teaching-activities', async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { 
+      lessonId, 
+      lessonTitle, 
+      lessonCode, 
+      learningObjectives = [], 
+      lang = 'vi' 
+    } = req.body;
+
+    const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
+    const modelHeader = req.headers['x-gemini-model'] as string | undefined;
+    const ai = createDynamicClient(apiKeyHeader);
+
+    const systemPrompt = lang === 'vi' ?
+      `Bạn là Chuyên gia Phương pháp Giảng dạy Toán học Cambridge (Stage 6).
+      Nhiệm vụ của bạn là lập kế hoạch hoạt động dạy học (Lesson Plan) chi tiết, sinh động, dễ áp dụng trong lớp học cho Giáo viên.
+      Hãy viết bằng tiếng Việt và tuân thủ các phương pháp sư phạm tích cực, trực quan.
+      
+      Cơ cấu bài viết bắt buộc chia làm các mục sau sử dụng emoji sinh động:
+      🎯 **Mục tiêu sư phạm (Pedagogical Goal)**: Tóm tắt trọng tâm kỹ năng cần đạt.
+      🔥 **Hoạt động Khởi động (Warm-up / Hook)** (5-10 phút): Một câu đố, trò chơi nhanh hoặc thảo luận câu hỏi thực tế để gây chú ý.
+      📖 **Khai phá Kiến thức (Core Concept)** (15-20 phút): Các bước giáo viên giảng giải trực quan, sử dụng mô hình học cụ gì (ví dụ: mô hình thanh Bar Model, lưới phần trăm, hình học giấy gấp, trục tọa độ).
+      🎮 **Thực hành lớp học / Trò chơi nhóm (Active Practice & Game)** (10-15 phút): Trò chơi vận động hoặc thử thách nhóm để củng cố lý thuyết.
+      ⚖️ **Chiến lược Phân hóa học sinh (Differentiation)**:
+        - *Nhóm cần hỗ trợ (Support)*: Gợi ý cách đặt câu hỏi đơn giản hơn.
+        - *Nhóm mở rộng (Extension)*: Câu hỏi nâng cao thử thách tư duy phản biện.
+      📝 **Ý tưởng Phiếu bài tập (Worksheet Concept)**: Một đề bài tập mẫu tiêu biểu.
+      
+      Lưu ý: Không đặt nội dung trong các khối mã markdown (\`\`\`). Trả lời trực tiếp dạng văn bản.`
+      :
+      `You are an expert Cambridge Primary Mathematics Stage 6 Pedagogical Specialist.
+      Your task is to generate a detailed, visual, and highly interactive classroom lesson plan / teaching activities guide for teachers.
+      Respond in English.
+      
+      Structure your response exactly using these headers with emojis:
+      🎯 **Pedagogical Goal**: The core concept teachers should focus on.
+      🔥 **Warm-up / Hook** (5-10 mins): A quick mental math game, puzzle, or discussion to grab attention.
+      📖 **Core Concept & Direct Instruction** (15-20 mins): Step-by-step visual instruction guide, recommending specific tools (e.g. Bar models, fraction grids, coordinate planes).
+      🎮 **Active Practice & Team Game** (10-15 mins): A collaborative classroom game or group challenge.
+      ⚖️ **Differentiation Strategies**:
+        - *Support Group*: Simplifications and scaffolding prompts.
+        - *Extension Group*: Challenge questions promoting critical math thinking.
+      📝 **Worksheet Concept**: A sample homework/worksheet question.
+      
+      Note: Do not enclose your response in code blocks (\`\`\`). Write plain formatted markdown text directly.`;
+
+    const userPrompt = lang === 'vi' ?
+      `Lập kế hoạch hoạt động giảng dạy cho bài học sau:
+      - Mã bài học: ${lessonCode}
+      - Tên bài học: ${lessonTitle}
+      - Chuẩn kiến thức đầu ra:
+      ${learningObjectives.map((obj: string, i: number) => `  ${i+1}. ${obj}`).join('\n')}`
+      :
+      `Generate teaching activities and classroom lesson plan for:
+      - Lesson Code: ${lessonCode}
+      - Lesson Title: ${lessonTitle}
+      - Learning Objectives:
+      ${learningObjectives.map((obj: string, i: number) => `  ${i+1}. ${obj}`).join('\n')}`;
+
+    if (!ai) {
+      // Offline fallback: handled gracefully
+      res.json({ text: "", isOfflineMode: true });
+      return;
+    }
+
+    const response = await generateContentWithFallback(ai, [{ role: 'user', parts: [{ text: userPrompt }] }], systemPrompt, modelHeader, 0.4);
+    res.json({
+      text: response.text || "Could not generate teaching activities.",
+      isOfflineMode: false
+    });
+
+  } catch (error: any) {
+    console.error("Error in teaching-activities route:", error);
+    res.status(500).json({ error: error.message || "Failed to generate teaching plan" });
+  }
+});
+
 // Configure Vite middleware in development or static distribution in production
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

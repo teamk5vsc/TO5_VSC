@@ -105,7 +105,15 @@ const TRANSLATIONS: TranslationDict = {
   totalStats: { en: 'Total Statistics', vi: 'Thống kê tổng quan' },
   statsDocs: { en: 'Documents', vi: 'Tài liệu' },
   statsPages: { en: 'Total Pages', vi: 'Tổng số trang' },
-  statsSize: { en: 'Total Size', vi: 'Tổng dung lượng' }
+  statsSize: { en: 'Total Size', vi: 'Tổng dung lượng' },
+  teachingAssistantTitle: { en: 'AI Teaching Activities Assistant', vi: 'Trợ lý Hoạt động Dạy học (AI)' },
+  teachingAssistantSubtitle: { en: 'Generate interactive classroom plans & differentiation tasks.', vi: 'Thiết kế hoạt động dạy học, trò chơi và phân hóa lớp học.' },
+  selectLessonLabel: { en: 'Select Lesson:', vi: 'Chọn bài học:' },
+  generateActivitiesBtn: { en: 'Generate Plan', vi: 'Tạo gợi ý hoạt động' },
+  generatingActivitiesProgress: { en: 'Generating Plan...', vi: 'Đang soạn bài...' },
+  closeModalBtn: { en: 'Close Plan', vi: 'Đóng giáo án' },
+  copySuccessMsg: { en: 'Plan copied to clipboard!', vi: 'Đã sao chép giáo án vào khay nhớ tạm!' },
+  copyPlanBtn: { en: 'Copy Plan', vi: 'Sao chép giáo án' }
 };
 
 interface LanguageContextType {
