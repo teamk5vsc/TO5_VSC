@@ -1449,7 +1449,8 @@ export const DEMO_LESSONS: Lesson[] = [
       content: {
         en: 'A net is a 2D pattern that can be folded to make a 3D shape.',
         vi: 'Hình trải phẳng là bản vẽ phẳng 2D có thể gấp lại thành hình khối 3D.'
-      }
+      },
+      visualAidType: 'transform-sandbox'
     },
     example: {
       problem: {

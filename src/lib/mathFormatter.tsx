@@ -27,14 +27,16 @@ export function formatMathText(text: string): string {
     while (res !== prevRes) {
       prevRes = res;
       res = res.replace(/\\frac\{((?:[^{}]+|\{[^{}]*\})*)\}\{((?:[^{}]+|\{[^{}]*\})*)\}/g, (_, num, den) => {
-        return `<span class="inline-flex flex-col items-center justify-center font-serif align-middle mx-1" style="font-size: 0.9em; line-height: 1.15;"><span class="border-b border-indigo-650 dark:border-indigo-400 px-1.5 text-center leading-none pb-0.5">${num}</span><span class="text-center leading-none pt-0.5">${den}</span></span>`;
+        return `<span class="inline-flex flex-col items-center justify-center font-serif align-middle mx-1" style="font-size: 0.95em; line-height: 1.1;"><span class="border-b border-indigo-650 dark:border-indigo-400 px-1.5 text-center leading-none pb-0.5">${num}</span><span class="text-center leading-none pt-0.5">${den}</span></span>`;
       });
     }
 
     // LaTeX symbols
     res = res
-      .replace(/\\times/g, '<span class="mx-1 font-sans font-bold text-indigo-650 dark:text-indigo-450 text-sm">×</span>')
-      .replace(/\\div/g, '<span class="mx-1 font-sans font-bold text-indigo-650 dark:text-indigo-450 text-sm">÷</span>')
+      .replace(/\\times/g, '<span class="mx-1 font-sans font-bold text-indigo-650 dark:text-indigo-400 text-sm">×</span>')
+      .replace(/\\div/g, '<span class="mx-1 font-sans font-bold text-indigo-650 dark:text-indigo-400 text-sm">÷</span>')
+      .replace(/\\dots/g, '<span class="mx-0.5 font-sans font-medium text-slate-700 dark:text-slate-350">…</span>')
+      .replace(/\\cdots/g, '<span class="mx-0.5 font-sans font-medium text-slate-700 dark:text-slate-350">⋯</span>')
       .replace(/\\rightarrow/g, '<span class="mx-1.5 text-slate-500">→</span>')
       .replace(/\\quad/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
       .replace(/\\text\{([^}]+)\}/g, '<span class="font-sans font-normal text-slate-650 dark:text-slate-450">$1</span>');
@@ -57,7 +59,16 @@ export function formatMathText(text: string): string {
     return res;
   };
 
-  // 2. Parse inline math $...$ first (giving them styled background containers)
+  // 2. Convert block math $$...$$ first to prevent interference
+  html = html.replace(/\$\$(.*?)\$\$/g, (_, formula) => {
+    const formatted = formatMath(formula);
+    return `<div class="font-mono bg-indigo-50/70 dark:bg-indigo-950/30 text-indigo-800 dark:text-indigo-300 p-3 my-2 rounded-xl border border-indigo-150/30 text-center font-bold text-sm block overflow-x-auto">${formatted}</div>`;
+  });
+
+  // 3. Convert inline math \(...\) to $...$ for unified rendering
+  html = html.replace(/\\\((.*?)\\\)/g, '$$1$');
+
+  // 4. Parse inline math $...$
   const parts = html.split('$');
   let parsedHtml = '';
   for (let i = 0; i < parts.length; i++) {
@@ -65,12 +76,11 @@ export function formatMathText(text: string): string {
       const formatted = formatMath(parts[i]);
       parsedHtml += `<span class="font-mono bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-150/40 font-bold text-xs inline-block mx-0.5 align-middle">${formatted}</span>`;
     } else {
-      const formattedText = formatMath(parts[i]);
-      parsedHtml += formattedText;
+      parsedHtml += formatMath(parts[i]);
     }
   }
 
-  // 3. Parse bold markdown **text**
+  // 5. Parse bold markdown **text**
   parsedHtml = parsedHtml.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
   return parsedHtml;

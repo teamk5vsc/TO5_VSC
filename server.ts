@@ -17,6 +17,11 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+const SHARED_DOCS_DIR = path.join(process.cwd(), 'shared_docs');
+if (!fs.existsSync(SHARED_DOCS_DIR)) {
+  fs.mkdirSync(SHARED_DOCS_DIR, { recursive: true });
+}
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -310,10 +315,35 @@ app.post('/api/gemini/knowledge-chat', async (req: express.Request, res: express
   try {
     const { 
       query, 
-      context, // Compiled text content from all uploaded docs
-      history = [], // array of { role: 'user' | 'model', text: string }
+      context: clientContext, 
+      docIds,
+      history = [], 
       lang = 'vi'
     } = req.body;
+
+    let context = clientContext || '';
+    if (docIds && Array.isArray(docIds) && docIds.length > 0) {
+      let compiledServerContext = '';
+      for (const id of docIds) {
+        const filePath = path.join(SHARED_DOCS_DIR, `${id}.json`);
+        if (fs.existsSync(filePath)) {
+          try {
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            const parsed = JSON.parse(fileContent);
+            compiledServerContext += `=== START OF DOCUMENT: ${parsed.metadata.fileName} ===\n`;
+            for (const page of parsed.pages) {
+              compiledServerContext += `[Source: ${parsed.metadata.fileName}, Page: ${page.pageNum}]\n${page.text}\n\n`;
+            }
+            compiledServerContext += `=== END OF DOCUMENT: ${parsed.metadata.fileName} ===\n\n`;
+          } catch (e) {
+            console.error(`Error compiling doc ${id} on server:`, e);
+          }
+        }
+      }
+      if (compiledServerContext) {
+        context = compiledServerContext;
+      }
+    }
 
     const apiKeyHeader = req.headers['x-api-key'] as string | undefined;
     const modelHeader = req.headers['x-gemini-model'] as string | undefined;
@@ -451,6 +481,87 @@ HƯỚNG DẪN DÀNG CHO BẠN:
     res.status(status).json({
       error: error.message || "Could not request Socratic response"
     });
+  }
+});
+
+// Shared Documents Management Endpoints
+app.post('/api/shared-documents', (req: express.Request, res: express.Response): void => {
+  try {
+    const { metadata, pages } = req.body;
+    if (!metadata || !metadata.id || !pages) {
+      res.status(400).json({ error: "Missing metadata or pages" });
+      return;
+    }
+    const filePath = path.join(SHARED_DOCS_DIR, `${metadata.id}.json`);
+    fs.writeFileSync(filePath, JSON.stringify({ metadata, pages }, null, 2));
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Error saving shared document:", err);
+    res.status(500).json({ error: err.message || "Failed to save document" });
+  }
+});
+
+app.get('/api/shared-documents', (req: express.Request, res: express.Response): void => {
+  try {
+    if (!fs.existsSync(SHARED_DOCS_DIR)) {
+      res.json([]);
+      return;
+    }
+    const files = fs.readdirSync(SHARED_DOCS_DIR);
+    const metadataList = files
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        try {
+          const content = fs.readFileSync(path.join(SHARED_DOCS_DIR, file), 'utf-8');
+          const parsed = JSON.parse(content);
+          return parsed.metadata;
+        } catch (e) {
+          console.error("Error parsing file:", file, e);
+          return null;
+        }
+      })
+      .filter(Boolean);
+    res.json(metadataList);
+  } catch (err: any) {
+    console.error("Error listing shared documents:", err);
+    res.status(500).json({ error: err.message || "Failed to list documents" });
+  }
+});
+
+app.get('/api/shared-documents/:id/page/:pageNum', (req: express.Request, res: express.Response): void => {
+  try {
+    const { id, pageNum } = req.params;
+    const filePath = path.join(SHARED_DOCS_DIR, `${id}.json`);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ error: "Document not found" });
+      return;
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const parsed = JSON.parse(content);
+    const targetPageNum = parseInt(pageNum, 10);
+    const page = parsed.pages.find((p: any) => p.pageNum === targetPageNum);
+    if (!page) {
+      res.status(404).json({ error: "Page not found" });
+      return;
+    }
+    res.json({ text: page.text });
+  } catch (err: any) {
+    console.error("Error fetching page text:", err);
+    res.status(500).json({ error: err.message || "Failed to fetch page text" });
+  }
+});
+
+app.delete('/api/shared-documents/:id', (req: express.Request, res: express.Response): void => {
+  try {
+    const { id } = req.params;
+    const filePath = path.join(SHARED_DOCS_DIR, `${id}.json`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Error deleting shared document:", err);
+    res.status(500).json({ error: err.message || "Failed to delete document" });
   }
 });
 

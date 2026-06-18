@@ -21,6 +21,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
+import { formatMathText } from '../lib/mathFormatter';
 import { 
   getDocumentsMetadata, 
   compileContextForChat, 
@@ -159,7 +160,7 @@ export default function FloatingKnowledgeBase() {
           },
           body: JSON.stringify({
             query: queryText,
-            context,
+            docIds,
             history: historyContext,
             lang: language
           })
@@ -315,15 +316,8 @@ INSTRUCTIONS:
 
   // Format citations into clickable buttons to support "rõ nguồn"
   const renderMessageHTML = (text: string) => {
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
-    // 1. Render LaTeX formulas \( ... \)
-    html = html.replace(/\\\((.*?)\\\)/g, (_, formula) => {
-      return `<span class="font-mono bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-1 py-0.5 rounded border border-indigo-150/40 font-semibold text-[11px] inline-block">${formula}</span>`;
-    });
+    // 1. Format math, bold, and escape HTML
+    let html = formatMathText(text);
 
     // 2. Render citations as CLICKABLE buttons with data attributes
     html = html.replace(/\[📄\s*(.*?)(?:,?\s*(?:page|trang|p\.?|trang:|page:)?\s*(\d+))?\]/gi, (_, filename, page) => {
@@ -335,10 +329,7 @@ INSTRUCTIONS:
       return `<button type="button" class="citation-btn inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300 dark:hover:bg-indigo-900 text-[10px] font-bold border border-indigo-200/50 hover:border-indigo-350 shadow-3xs cursor-pointer transition-all active:scale-95" data-file="${cleanFilename}" data-page="${page || ''}">📄 ${cleanFilename.substring(0, 12)}${cleanFilename.length > 12 ? '...' : ''}${pageInfo} <span class="text-[8px] bg-indigo-250 dark:bg-indigo-800 text-indigo-850 px-1 rounded-full"><kbd class="font-sans">click</kbd></span></button>`;
     });
 
-    // 3. Render bold markdown
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // 4. Render bullet points
+    // 3. Render bullet points
     const lines = html.split('\n');
     let inList = false;
     let listHtml = '';

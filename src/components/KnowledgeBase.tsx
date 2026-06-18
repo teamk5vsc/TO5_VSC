@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
 import { extractTextFromPDF } from '../lib/pdfExtractor';
+import { formatMathText } from '../lib/mathFormatter';
 import { 
   addDocument, 
   deleteDocument, 
@@ -34,7 +35,11 @@ import {
   getActiveThreadId,
   setActiveThreadId,
   ChatThread,
-  ChatMessage
+  ChatMessage,
+  uploadDocToServer,
+  deleteDocFromServer,
+  fetchSharedDocumentsFromServer,
+  fetchPageTextFromServer
 } from '../lib/knowledgeStore';
 
 interface Message {
@@ -45,7 +50,7 @@ interface Message {
   isOffline?: boolean;
 }
 
-export default function KnowledgeBase() {
+export default function KnowledgeBase({ role = 'student' }: { role?: 'student' | 'teacher' }) {
   const { language, t } = useLanguage();
   const [documents, setDocuments] = useState<DocumentMetadata[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -84,7 +89,16 @@ export default function KnowledgeBase() {
     setIsLoadingPreview(true);
     setPreviewText(null);
     try {
-      const text = await getDocumentPageText(fileName, pageNum);
+      let text = await getDocumentPageText(fileName, pageNum);
+      
+      // If student or text not stored locally, fetch page text from server
+      if (!text) {
+        const matchedDoc = documents.find((doc) => doc.fileName === fileName);
+        if (matchedDoc && pageNum) {
+          text = await fetchPageTextFromServer(matchedDoc.id, pageNum);
+        }
+      }
+
       const isVi = language === 'vi';
       setPreviewText(text || (isVi ? 'Không tìm thấy nội dung văn bản cho trang này.' : 'No text content found for this page.'));
     } catch (err) {
@@ -125,9 +139,18 @@ export default function KnowledgeBase() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const loadDocuments = () => {
-    const list = getDocumentsMetadata();
-    setDocuments(list);
+  const loadDocuments = async () => {
+    try {
+      const list = await fetchSharedDocumentsFromServer();
+      if (list.length > 0) {
+        setDocuments(list);
+        return;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch documents from server, loading local storage:", err);
+    }
+    const localList = getDocumentsMetadata();
+    setDocuments(localList);
   };
 
   const loadThreads = () => {
@@ -333,15 +356,19 @@ export default function KnowledgeBase() {
         }
 
         newDoc = await addDocument(file.name, 'pdf', file.size, result.pageCount, result.pages);
+        // Sync pages to the server securely
+        await uploadDocToServer(newDoc, result.pages);
       } else {
         // Process plain text file
         const textContent = await readTextFile(file);
         const pages = [{ pageNum: 1, text: textContent }];
         newDoc = await addDocument(file.name, 'txt', file.size, 1, pages);
+        // Sync plain text to the server securely
+        await uploadDocToServer(newDoc, pages);
       }
 
       setSuccessText(t('extractSuccess'));
-      loadDocuments();
+      await loadDocuments();
 
       // Automatically create a new thread for this file and switch to it!
       const isVi = language === 'vi';
@@ -370,7 +397,8 @@ export default function KnowledgeBase() {
       setErrorText('');
       setSuccessText('');
       await deleteDocument(id);
-      loadDocuments();
+      await deleteDocFromServer(id);
+      await loadDocuments();
       
       // Update all threads to remove the deleted doc ID
       const currentThreads = getChatThreads();
@@ -437,7 +465,8 @@ export default function KnowledgeBase() {
           },
           body: JSON.stringify({
             query: queryText,
-            context,
+            context: role === 'teacher' ? context : undefined,
+            docIds,
             history: historyContext,
             lang: language
           })
@@ -615,23 +644,10 @@ HƯỚNG DẪN DÀNG CHO BẠN:
 
   // Helper formatting to render bullet points, bold text, citations, and LaTeX math style beautifully
   const renderMessageContent = (text: string) => {
-    // 1. Escape HTML entities
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    // 1. Format math, bold, and escape HTML using our unified library
+    let html = formatMathText(text);
 
-    // 2. Parse inline LaTeX formulas \( ... \)
-    html = html.replace(/\\\((.*?)\\\)/g, (_, formula) => {
-      return `<span class="font-mono bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-150/40 font-semibold text-xs inline-block">${formula}</span>`;
-    });
-
-    // 3. Parse block LaTeX formulas $$ ... $$
-    html = html.replace(/\$\$(.*?)\$\$/g, (_, formula) => {
-      return `<div class="font-mono bg-indigo-50/70 dark:bg-indigo-950/30 text-indigo-800 dark:text-indigo-300 p-3 my-2 rounded-xl border border-indigo-150/30 text-center font-bold text-sm block overflow-x-auto">${formula}</div>`;
-    });
-
-    // 4. Parse citations [📄 filename, page X] or [📄 filename]
+    // 2. Parse citations [📄 filename, page X] or [📄 filename]
     html = html.replace(/\[📄\s*(.*?)(?:,?\s*(?:page|trang|p\.?|trang:|page:)?\s*(\d+))?\]/gi, (_, filename, page) => {
       let cleanFilename = filename.trim();
       if (cleanFilename.endsWith(',')) {
@@ -641,10 +657,7 @@ HƯỚNG DẪN DÀNG CHO BẠN:
       return `<button type="button" class="citation-btn inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300 dark:hover:bg-indigo-900 text-[10px] font-bold border border-indigo-200/50 hover:border-indigo-350 shadow-3xs cursor-pointer transition-all active:scale-95" data-file="${cleanFilename}" data-page="${page || ''}">📄 ${cleanFilename.substring(0, 15)}${cleanFilename.length > 15 ? '...' : ''}${pageInfo} <span class="text-[8px] bg-indigo-250 dark:bg-indigo-800 text-indigo-850 px-1 rounded-full"><kbd class="font-sans">click</kbd></span></button>`;
     });
 
-    // 5. Parse bold markdown **text**
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // 6. Parse bullet points
+    // 3. Parse bullet points
     const lines = html.split('\n');
     let inList = false;
     let listHtml = '';
@@ -707,41 +720,43 @@ HƯỚNG DẪN DÀNG CHO BẠN:
           </div>
 
           {/* Drag and drop upload zone */}
-          <div 
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 shrink-0"
-          >
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".pdf,.txt"
-              className="hidden" 
-            />
-            {isProcessingFile ? (
-              <>
-                <RefreshCw className="h-7 w-7 text-indigo-500 animate-spin" />
-                <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 animate-pulse">
-                  {t('processingPdf')}
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="p-2.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
-                  <Upload className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  {t('uploadPlaceholder')}
-                </p>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                  {t('fileLimitWarning')}
-                </span>
-              </>
-            )}
-          </div>
+          {role === 'teacher' && (
+            <div 
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 shrink-0"
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".pdf,.txt"
+                className="hidden" 
+              />
+              {isProcessingFile ? (
+                <>
+                  <RefreshCw className="h-7 w-7 text-indigo-500 animate-spin" />
+                  <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 animate-pulse">
+                    {t('processingPdf')}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="p-2.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {t('uploadPlaceholder')}
+                  </p>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                    {t('fileLimitWarning')}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Alert text boxes */}
           <AnimatePresence>
@@ -819,16 +834,18 @@ HƯỚNG DẪN DÀNG CHO BẠN:
                       </div>
                     </div>
                     
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteDocument(doc.id, doc.fileName);
-                      }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
-                      title="Delete document"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {role === 'teacher' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDocument(doc.id, doc.fileName);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
+                        title="Delete document"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 );
               })

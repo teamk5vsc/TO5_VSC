@@ -57,6 +57,7 @@ const DEFAULT_STUDENTS: StudentProfile[] = [
 function AppContent() {
   const { t } = useLanguage();
   const [currentMode, setCurrentMode] = useState<'student' | 'teacher' | 'knowledge'>('student');
+  const [userRole, setUserRole] = useState<'student' | 'teacher'>('student');
   
   // Real-time synced core stores
   const [students, setStudents] = useState<StudentProfile[]>(() => {
@@ -233,7 +234,12 @@ function AppContent() {
       {/* Global Interactive Header */}
       <Navbar 
         currentMode={currentMode} 
-        onModeChange={setCurrentMode} 
+        onModeChange={(mode) => {
+          setCurrentMode(mode);
+          if (mode === 'student' || mode === 'teacher') {
+            setUserRole(mode);
+          }
+        }} 
         student={student}
         onOpenSettings={() => setIsSettingsOpen(true)}
         hasApiKey={!!apiKey}
@@ -272,7 +278,7 @@ function AppContent() {
             mistakes={mistakes}
           />
         ) : (
-          <KnowledgeBase />
+          <KnowledgeBase role={userRole} />
         )}
       </main>
 

@@ -234,3 +234,56 @@ export function setActiveThreadId(id: string | null): void {
   }
 }
 
+export async function uploadDocToServer(metadata: DocumentMetadata, pages: ExtractedPage[]): Promise<void> {
+  try {
+    const response = await fetch('/api/shared-documents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ metadata, pages })
+    });
+    if (!response.ok) {
+      throw new Error(`Upload server error: ${response.status}`);
+    }
+  } catch (err) {
+    console.error('Error uploading doc to server:', err);
+  }
+}
+
+export async function deleteDocFromServer(id: string): Promise<void> {
+  try {
+    const response = await fetch(`/api/shared-documents/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) {
+      throw new Error(`Delete server error: ${response.status}`);
+    }
+  } catch (err) {
+    console.error('Error deleting doc from server:', err);
+  }
+}
+
+export async function fetchSharedDocumentsFromServer(): Promise<DocumentMetadata[]> {
+  try {
+    const response = await fetch('/api/shared-documents');
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (err) {
+    console.error('Error fetching documents from server:', err);
+  }
+  return [];
+}
+
+export async function fetchPageTextFromServer(id: string, pageNum: number): Promise<string | null> {
+  try {
+    const response = await fetch(`/api/shared-documents/${id}/page/${pageNum}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.text;
+    }
+  } catch (err) {
+    console.error('Error fetching page text from server:', err);
+  }
+  return null;
+}
+
