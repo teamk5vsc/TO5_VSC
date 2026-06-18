@@ -113,7 +113,13 @@ const TRANSLATIONS: TranslationDict = {
   generatingActivitiesProgress: { en: 'Generating Plan...', vi: 'Đang soạn bài...' },
   closeModalBtn: { en: 'Close Plan', vi: 'Đóng giáo án' },
   copySuccessMsg: { en: 'Plan copied to clipboard!', vi: 'Đã sao chép giáo án vào khay nhớ tạm!' },
-  copyPlanBtn: { en: 'Copy Plan', vi: 'Sao chép giáo án' }
+  copyPlanBtn: { en: 'Copy Plan', vi: 'Sao chép giáo án' },
+  newChatBtn: { en: 'New Chat', vi: 'Cuộc trò chuyện mới' },
+  chatHistoryTitle: { en: 'Conversations', vi: 'Lịch sử trò chuyện' },
+  renameThreadTitle: { en: 'Rename Conversation', vi: 'Đổi tên cuộc hội thoại' },
+  deleteThreadConfirm: { en: 'Are you sure you want to delete this conversation and its history?', vi: 'Bạn có chắc chắn muốn xóa cuộc trò chuyện này cùng toàn bộ lịch sử không?' },
+  allDocsLabel: { en: 'All Documents', vi: 'Tất cả tài liệu' },
+  activeDocsCountLabel: { en: 'source documents', vi: 'tài liệu nguồn' }
 };
 
 interface LanguageContextType {

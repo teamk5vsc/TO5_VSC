@@ -25,7 +25,9 @@ import {
   getDocumentsMetadata, 
   compileContextForChat, 
   getDocumentPageText,
-  DocumentMetadata 
+  DocumentMetadata,
+  getChatThreads,
+  getActiveThreadId
 } from '../lib/knowledgeStore';
 
 interface Message {
@@ -131,7 +133,11 @@ export default function FloatingKnowledgeBase() {
     setErrorText('');
 
     try {
-      const context = await compileContextForChat();
+      const activeId = getActiveThreadId();
+      const currentThreads = getChatThreads();
+      const activeThread = currentThreads.find(t => t.id === activeId);
+      const docIds = activeThread ? activeThread.selectedDocIds : undefined;
+      const context = await compileContextForChat(docIds);
       const historyContext = messages.map(m => ({
         role: m.role,
         text: m.text

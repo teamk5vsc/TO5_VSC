@@ -14,7 +14,11 @@ import {
   Clock,
   Layers,
   BookOpen,
-  X
+  X,
+  MessageSquare,
+  Plus,
+  Edit2,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
 import { extractTextFromPDF } from '../lib/pdfExtractor';
@@ -24,7 +28,13 @@ import {
   getDocumentsMetadata, 
   compileContextForChat, 
   getDocumentPageText,
-  DocumentMetadata 
+  DocumentMetadata,
+  getChatThreads,
+  saveChatThreads,
+  getActiveThreadId,
+  setActiveThreadId,
+  ChatThread,
+  ChatMessage
 } from '../lib/knowledgeStore';
 
 interface Message {
@@ -46,6 +56,14 @@ export default function KnowledgeBase() {
   const [successText, setSuccessText] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   
+  // Chat threads states
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [activeThreadId, setActiveThreadIdState] = useState<string | null>(null);
+  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+
+  const activeThread = threads.find(t => t.id === activeThreadId) || null;
+
   // Citation preview states
   const [previewSource, setPreviewSource] = useState<{ fileName: string; pageNum?: number } | null>(null);
   const [previewText, setPreviewText] = useState<string | null>(null);
@@ -80,11 +98,27 @@ export default function KnowledgeBase() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load documents metadata on mount
+  // Load documents and threads on mount or language change
   useEffect(() => {
     loadDocuments();
-    initGreeting();
+    loadThreads();
   }, [language]);
+
+  // Keep local messages state updated with active thread's messages
+  useEffect(() => {
+    if (activeThread) {
+      const mapped = activeThread.messages.map(m => ({
+        id: m.id,
+        role: m.role,
+        text: m.text,
+        timestamp: new Date(m.timestamp),
+        isOffline: m.isOffline
+      }));
+      setMessages(mapped);
+    } else {
+      setMessages([]);
+    }
+  }, [activeThreadId, threads]);
 
   // Keep chat scrolled to bottom
   useEffect(() => {
@@ -96,14 +130,139 @@ export default function KnowledgeBase() {
     setDocuments(list);
   };
 
-  const initGreeting = () => {
-    const welcomeMessage: Message = {
-      id: 'welcome_kb',
-      role: 'model',
-      text: t('chatWelcome'),
-      timestamp: new Date()
+  const loadThreads = () => {
+    const loadedThreads = getChatThreads();
+    let activeId = getActiveThreadId();
+
+    if (loadedThreads.length === 0) {
+      const isVi = language === 'vi';
+      const defaultTitle = isVi ? 'Hội thoại chung' : 'General Chat';
+      const docs = getDocumentsMetadata();
+      const defaultDocIds = docs.map(d => d.id);
+      
+      const defaultThread: ChatThread = {
+        id: `thread_${Date.now()}`,
+        title: defaultTitle,
+        messages: [{
+          id: 'welcome_kb',
+          role: 'model',
+          text: t('chatWelcome'),
+          timestamp: new Date().toISOString()
+        }],
+        selectedDocIds: defaultDocIds,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const newList = [defaultThread];
+      saveChatThreads(newList);
+      setThreads(newList);
+      setActiveThreadIdState(defaultThread.id);
+      setActiveThreadId(defaultThread.id);
+    } else {
+      setThreads(loadedThreads);
+      if (!activeId || !loadedThreads.some(t => t.id === activeId)) {
+        activeId = loadedThreads[0].id;
+      }
+      setActiveThreadIdState(activeId);
+      setActiveThreadId(activeId);
+    }
+  };
+
+  const handleCreateNewThread = (titleOverride?: string, docIdsOverride?: string[]) => {
+    const isVi = language === 'vi';
+    const docs = getDocumentsMetadata();
+    const currentThreads = getChatThreads();
+    
+    const selectedIds = docIdsOverride || docs.map(d => d.id);
+    let threadTitle = titleOverride || (isVi ? `Hội thoại mới (${currentThreads.length + 1})` : `New Chat (${currentThreads.length + 1})`);
+    
+    const newThread: ChatThread = {
+      id: `thread_${Date.now()}`,
+      title: threadTitle,
+      messages: [{
+        id: 'welcome_kb',
+        role: 'model',
+        text: t('chatWelcome'),
+        timestamp: new Date().toISOString()
+      }],
+      selectedDocIds: selectedIds,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    setMessages([welcomeMessage]);
+
+    const updated = [newThread, ...currentThreads];
+    saveChatThreads(updated);
+    setThreads(updated);
+    setActiveThreadIdState(newThread.id);
+    setActiveThreadId(newThread.id);
+  };
+
+  const handleDeleteThread = (threadId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (threads.length <= 1) {
+      alert(language === 'vi' 
+        ? 'Bạn không thể xóa cuộc hội thoại duy nhất còn lại.' 
+        : 'You cannot delete the only remaining conversation.');
+      return;
+    }
+    
+    if (window.confirm(t('deleteThreadConfirm'))) {
+      const updated = threads.filter(t => t.id !== threadId);
+      saveChatThreads(updated);
+      setThreads(updated);
+      if (activeThreadId === threadId) {
+        const nextActiveId = updated[0].id;
+        setActiveThreadIdState(nextActiveId);
+        setActiveThreadId(nextActiveId);
+      }
+    }
+  };
+
+  const handleStartRenameThread = (threadId: string, title: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingThreadId(threadId);
+    setEditingTitle(title);
+  };
+
+  const handleSaveRenameThread = (threadId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editingTitle.trim()) return;
+    const updated = threads.map(t => {
+      if (t.id === threadId) {
+        return { ...t, title: editingTitle.trim(), updatedAt: new Date().toISOString() };
+      }
+      return t;
+    });
+    saveChatThreads(updated);
+    setThreads(updated);
+    setEditingThreadId(null);
+  };
+
+  const handleToggleDocSelection = (docId: string) => {
+    if (!activeThread) return;
+    
+    const isSelected = activeThread.selectedDocIds.includes(docId);
+    let newDocIds = [];
+    if (isSelected) {
+      newDocIds = activeThread.selectedDocIds.filter(id => id !== docId);
+    } else {
+      newDocIds = [...activeThread.selectedDocIds, docId];
+    }
+    
+    const updatedThreads = threads.map(t => {
+      if (t.id === activeThread.id) {
+        return {
+          ...t,
+          selectedDocIds: newDocIds,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return t;
+    });
+    
+    saveChatThreads(updatedThreads);
+    setThreads(updatedThreads);
   };
 
   // Drag and drop handlers
@@ -138,6 +297,8 @@ export default function KnowledgeBase() {
     }
   };
 
+
+
   // Process and extract text from PDF or TXT
   const processUploadedFile = async (file: File) => {
     const fileType = file.name.split('.').pop()?.toLowerCase();
@@ -158,6 +319,7 @@ export default function KnowledgeBase() {
 
     setIsProcessingFile(true);
     try {
+      let newDoc;
       if (fileType === 'pdf') {
         // Extract using pdfjs-dist utility
         const result = await extractTextFromPDF(file);
@@ -170,16 +332,22 @@ export default function KnowledgeBase() {
           return;
         }
 
-        await addDocument(file.name, 'pdf', file.size, result.pageCount, result.pages);
+        newDoc = await addDocument(file.name, 'pdf', file.size, result.pageCount, result.pages);
       } else {
         // Process plain text file
         const textContent = await readTextFile(file);
         const pages = [{ pageNum: 1, text: textContent }];
-        await addDocument(file.name, 'txt', file.size, 1, pages);
+        newDoc = await addDocument(file.name, 'txt', file.size, 1, pages);
       }
 
       setSuccessText(t('extractSuccess'));
       loadDocuments();
+
+      // Automatically create a new thread for this file and switch to it!
+      const isVi = language === 'vi';
+      const newTitle = isVi ? `Hỏi đáp: ${file.name}` : `Q&A: ${file.name}`;
+      handleCreateNewThread(newTitle, [newDoc.id]);
+      
     } catch (err) {
       console.error('Error processing file:', err);
       setErrorText(t('extractError'));
@@ -203,6 +371,15 @@ export default function KnowledgeBase() {
       setSuccessText('');
       await deleteDocument(id);
       loadDocuments();
+      
+      // Update all threads to remove the deleted doc ID
+      const currentThreads = getChatThreads();
+      const updated = currentThreads.map(t => ({
+        ...t,
+        selectedDocIds: t.selectedDocIds.filter(docId => docId !== id)
+      }));
+      saveChatThreads(updated);
+      setThreads(updated);
     }
   };
 
@@ -210,26 +387,39 @@ export default function KnowledgeBase() {
     if (e) e.preventDefault();
     
     const queryText = textOverride || inputText;
-    if (!queryText.trim() || isTyping) return;
+    if (!queryText.trim() || isTyping || !activeThreadId) return;
 
-    const userMsg: Message = {
+    const userMsgObj: ChatMessage = {
       id: `user_${Date.now()}`,
       role: 'user',
       text: queryText,
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    let updatedThreads = threads.map(t => {
+      if (t.id === activeThreadId) {
+        return {
+          ...t,
+          messages: [...t.messages, userMsgObj],
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return t;
+    });
+    saveChatThreads(updatedThreads);
+    setThreads(updatedThreads);
+
     if (!textOverride) setInputText('');
     setIsTyping(true);
     setErrorText('');
 
     try {
-      const context = await compileContextForChat();
-      const historyContext = messages.map(m => ({
+      const docIds = activeThread ? activeThread.selectedDocIds : undefined;
+      const context = await compileContextForChat(docIds);
+      const historyContext = activeThread ? activeThread.messages.map(m => ({
         role: m.role,
         text: m.text
-      }));
+      })) : [];
 
       const apiKey = localStorage.getItem('gemini_api_key') || '';
       const selectedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3-flash-preview';
@@ -273,7 +463,6 @@ export default function KnowledgeBase() {
 
         if (isValidGeminiKey(apiKey)) {
           try {
-            // Client-side prompt construction
             const systemPrompt = language === 'en'
               ? `You are a helpful AI study assistant for Grade 5-6 students studying Cambridge Primary Mathematics.
 The student has uploaded their own study materials. Below is the full text content extracted from these materials.
@@ -310,7 +499,6 @@ HƯỚNG DẪN DÀNG CHO BẠN:
             if (targetModel.includes('gemini-3-flash')) targetModel = 'gemini-2.5-flash';
             if (targetModel.includes('gemini-3-pro')) targetModel = 'gemini-2.5-pro';
 
-            // Filter out welcome message or any leading model message from Gemini history
             const filteredHistory = historyContext.map(h => ({
               role: h.role === 'user' ? 'user' : 'model',
               parts: [{ text: h.text }]
@@ -347,7 +535,6 @@ HƯỚNG DẪN DÀNG CHO BẠN:
         }
 
         if (!clientFallbackSuccess) {
-          // Offline local keyword search logic
           if (!context || context.trim() === '' || context === 'No documents uploaded yet.') {
             responseText = language === 'vi'
               ? "Không có dữ liệu tài liệu học tập. Vui lòng kéo thả file sách/tài liệu ở cột bên trái trước."
@@ -397,15 +584,27 @@ HƯỚNG DẪN DÀNG CHO BẠN:
         }
       }
 
-      const aiMsg: Message = {
+      const aiMsgObj: ChatMessage = {
         id: `ai_${Date.now()}`,
         role: 'model',
         text: responseText,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         isOffline: isOfflineMode
       };
 
-      setMessages(prev => [...prev, aiMsg]);
+      updatedThreads = updatedThreads.map(t => {
+        if (t.id === activeThreadId) {
+          return {
+            ...t,
+            messages: [...t.messages, aiMsgObj],
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return t;
+      });
+      saveChatThreads(updatedThreads);
+      setThreads(updatedThreads);
+      
     } catch (err: any) {
       console.error(err);
       setErrorText(err.message || 'Error communicating with AI Assistant.');
@@ -494,13 +693,13 @@ HƯỚNG DẪN DÀNG CHO BẠN:
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 md:p-6 max-w-7xl mx-auto w-full h-[calc(100vh-100px)] min-h-[550px] text-slate-800 dark:text-slate-200">
       
-      {/* LEFT COLUMN: Document Manager */}
+      {/* LEFT COLUMN: Document Manager & Chat Threads */}
       <div className="w-full lg:w-[320px] xl:w-[360px] flex flex-col gap-4 h-full shrink-0">
         
         {/* Document list & upload card */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-xl flex flex-col p-5 h-full overflow-hidden">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-xl flex flex-col p-5 flex-[5] overflow-hidden">
           
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 shrink-0">
             <BookOpen className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             <h2 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider text-sm">
               {t('uploadSectionTitle')}
@@ -513,11 +712,7 @@ HƯỚNG DẪN DÀNG CHO BẠN:
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-2 ${
-              isDragOver 
-                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 scale-[0.98]' 
-                : 'border-slate-300 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
-            }`}
+            className="border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-2 border-slate-300 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 shrink-0"
           >
             <input 
               type="file" 
@@ -555,7 +750,7 @@ HƯỚNG DẪN DÀNG CHO BẠN:
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/50 flex items-start gap-2 text-rose-700 dark:text-rose-300 text-xs"
+                className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/50 flex items-start gap-2 text-rose-700 dark:text-rose-300 text-xs shrink-0"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{errorText}</span>
@@ -566,7 +761,7 @@ HƯỚNG DẪN DÀNG CHO BẠN:
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-start gap-2 text-emerald-700 dark:text-emerald-300 text-xs"
+                className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-start gap-2 text-emerald-700 dark:text-emerald-300 text-xs shrink-0"
               >
                 <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{successText}</span>
@@ -584,65 +779,197 @@ HƯỚNG DẪN DÀNG CHO BẠN:
                 </p>
               </div>
             ) : (
-              documents.map((doc) => (
-                <div 
-                  key={doc.id}
-                  className="group relative flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/40 dark:border-slate-800/60 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 hover:border-indigo-150/40 dark:hover:border-indigo-900/30 transition-all duration-200"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 pr-6">
-                    <div className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 text-indigo-600 dark:text-indigo-400 shrink-0">
-                      <FileText className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold truncate text-slate-700 dark:text-slate-200" title={doc.fileName}>
-                        {doc.fileName}
-                      </p>
-                      <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">
-                        <span className="font-semibold px-1 rounded bg-slate-200/60 dark:bg-slate-800 uppercase text-[8px]">
-                          {doc.fileType}
-                        </span>
-                        <span>•</span>
-                        <span>{doc.pageCount} {t('docPages')}</span>
-                        <span>•</span>
-                        <span>{(doc.sizeBytes / 1024).toFixed(0)} KB</span>
+              documents.map((doc) => {
+                const isSelected = activeThread?.selectedDocIds.includes(doc.id) || false;
+                return (
+                  <div 
+                    key={doc.id}
+                    onClick={() => handleToggleDocSelection(doc.id)}
+                    className={`group relative flex items-center justify-between p-3 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      isSelected
+                        ? 'bg-indigo-50/40 dark:bg-indigo-950/15 border-indigo-200 dark:border-indigo-900/60'
+                        : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200/40 dark:border-slate-800/60 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 hover:border-indigo-150/40 dark:hover:border-indigo-900/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-6">
+                      <input 
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleToggleDocSelection(doc.id);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 shrink-0"
+                      />
+                      <div className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate text-slate-700 dark:text-slate-200" title={doc.fileName}>
+                          {doc.fileName}
+                        </p>
+                        <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          <span className="font-semibold px-1 rounded bg-slate-200/60 dark:bg-slate-800 uppercase text-[8px]">
+                            {doc.fileType}
+                          </span>
+                          <span>•</span>
+                          <span>{doc.pageCount} {t('docPages')}</span>
+                        </div>
                       </div>
                     </div>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteDocument(doc.id, doc.fileName);
+                      }}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
+                      title="Delete document"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
-                  
-                  <button
-                    onClick={() => handleDeleteDocument(doc.id, doc.fileName)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                    title="Delete document"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
           {/* Statistics summary */}
-          <div className="border-t border-slate-200/60 dark:border-slate-800/80 pt-4 mt-3 space-y-2 text-xs">
+          <div className="border-t border-slate-200/60 dark:border-slate-800/80 pt-3 mt-3 space-y-1.5 text-xs shrink-0">
             <h3 className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px]">
               {t('totalStats')}
             </h3>
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-slate-50 dark:bg-slate-800/30 p-2 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{t('statsDocs')}</p>
-                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-sm mt-0.5">{stats.docsCount}</p>
+              <div className="bg-slate-50 dark:bg-slate-800/30 p-1.5 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{t('statsDocs')}</p>
+                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-xs mt-0.5">{stats.docsCount}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800/30 p-2 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{t('statsPages')}</p>
-                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-sm mt-0.5">{stats.totalPages}</p>
+              <div className="bg-slate-50 dark:bg-slate-800/30 p-1.5 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{t('statsPages')}</p>
+                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-xs mt-0.5">{stats.totalPages}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800/30 p-2 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{t('statsSize')}</p>
-                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-[11px] leading-6 mt-0.5 truncate">{stats.sizeStr}</p>
+              <div className="bg-slate-50 dark:bg-slate-800/30 p-1.5 rounded-xl text-center border border-slate-100 dark:border-slate-800/30">
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{t('statsSize')}</p>
+                <p className="font-bold text-indigo-600 dark:text-indigo-400 text-[10px] mt-0.5 truncate">{stats.sizeStr}</p>
               </div>
             </div>
           </div>
           
         </div>
+
+        {/* Conversations list card */}
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-xl flex flex-col p-5 flex-[5] overflow-hidden">
+          
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400 animate-pulse-subtle" />
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider text-sm">
+                {t('chatHistoryTitle')}
+              </h2>
+            </div>
+            
+            <button
+              onClick={() => handleCreateNewThread()}
+              className="p-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-150/50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-900 border border-indigo-150/40 dark:border-indigo-850 shadow-3xs cursor-pointer flex items-center justify-center transition-all active:scale-95"
+              title={t('newChatBtn')}
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Threads list */}
+          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+            {threads.map((thread) => {
+              const isActive = thread.id === activeThreadId;
+              const isEditing = editingThreadId === thread.id;
+              
+              return (
+                <div
+                  key={thread.id}
+                  onClick={() => {
+                    if (!isActive) {
+                      setActiveThreadIdState(thread.id);
+                      setActiveThreadId(thread.id);
+                    }
+                  }}
+                  className={`group relative flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-indigo-50/70 to-purple-50/40 dark:from-indigo-950/30 dark:to-purple-950/15 border-indigo-200/80 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold'
+                      : 'bg-slate-50/50 dark:bg-slate-800/20 border-slate-200/30 dark:border-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:border-slate-200 dark:hover:border-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                    <MessageSquare className={`h-4 w-4 shrink-0 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                    
+                    {isEditing ? (
+                      <div className="flex items-center gap-1.5 w-full" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="text"
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveRenameThread(thread.id, e as any);
+                            if (e.key === 'Escape') setEditingThreadId(null);
+                          }}
+                          className="flex-1 px-2 py-1 bg-white dark:bg-slate-900 border border-indigo-400 rounded-lg text-xs focus:outline-none text-slate-800 dark:text-slate-100"
+                          autoFocus
+                        />
+                        <button
+                          onClick={(e) => handleSaveRenameThread(thread.id, e)}
+                          className="p-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 hover:bg-emerald-100 cursor-pointer"
+                        >
+                          <Check className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingThreadId(null);
+                          }}
+                          className="p-1 rounded-lg bg-slate-150 dark:bg-slate-850 text-slate-500 dark:text-slate-400 border border-slate-200/50 hover:bg-slate-200 cursor-pointer"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="min-w-0">
+                        <p className={`text-xs truncate ${isActive ? 'text-indigo-900 dark:text-indigo-200 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>
+                          {thread.title}
+                        </p>
+                        <div className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">
+                          <Layers className="h-2.5 w-2.5 text-indigo-400" />
+                          <span>
+                            {thread.selectedDocIds.length} / {documents.length} {t('activeDocsCountLabel')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {!isEditing && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => handleStartRenameThread(thread.id, thread.title, e)}
+                        className="p-1 rounded text-slate-400 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        title={t('renameThreadTitle')}
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteThread(thread.id, e)}
+                        className="p-1 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                        title="Delete conversation"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
 
       {/* RIGHT COLUMN: AI Chat Q&A */}
@@ -668,11 +995,13 @@ HƯỚNG DẪN DÀNG CHO BẠN:
               </div>
             </div>
             
-            {/* Database indicator */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-              <Database className="h-3 w-3 text-indigo-500" />
+            {/* Scoped source indicator */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-150/40 dark:border-indigo-900/50 text-[10px] text-indigo-700 dark:text-indigo-300 font-semibold shadow-3xs">
+              <Layers className="h-3.5 w-3.5 text-indigo-500" />
               <span>
-                {documents.length > 0 ? `${documents.length} source(s) cached` : '0 sources'}
+                {activeThread
+                  ? `${activeThread.selectedDocIds.length}/${documents.length} ${t('activeDocsCountLabel')}`
+                  : `0/${documents.length} ${t('activeDocsCountLabel')}`}
               </span>
             </div>
           </div>

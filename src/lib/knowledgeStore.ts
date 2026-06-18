@@ -147,15 +147,16 @@ export async function deleteDocument(id: string): Promise<void> {
   saveDocumentsMetadata(updatedList);
 }
 
-// Compile context from all documents for the AI prompt
-export async function compileContextForChat(): Promise<string> {
+// Compile context from selected documents for the AI prompt
+export async function compileContextForChat(docIds?: string[]): Promise<string> {
   const docs = getDocumentsMetadata();
-  if (docs.length === 0) {
+  const filteredDocs = docIds ? docs.filter(doc => docIds.includes(doc.id)) : docs;
+  if (filteredDocs.length === 0) {
     return 'No documents uploaded yet.';
   }
 
   let fullContext = '';
-  for (const doc of docs) {
+  for (const doc of filteredDocs) {
     const pages = await getDocumentPages(doc.id);
     fullContext += `=== START OF DOCUMENT: ${doc.fileName} ===\n`;
     for (const page of pages) {
@@ -181,5 +182,55 @@ export async function getDocumentPageText(
     return matchedPage ? matchedPage.text : null;
   }
   return pages.map(p => p.text).join('\n');
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  timestamp: string; // ISO string
+  isOffline?: boolean;
+}
+
+export interface ChatThread {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  selectedDocIds: string[]; // which docs are active for this thread
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}
+
+const THREADS_KEY = 'math_explorer_chat_threads';
+const ACTIVE_THREAD_ID_KEY = 'math_explorer_active_thread_id';
+
+export function getChatThreads(): ChatThread[] {
+  try {
+    const stored = localStorage.getItem(THREADS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (err) {
+    console.error('Error reading chat threads from localStorage:', err);
+    return [];
+  }
+}
+
+export function saveChatThreads(threads: ChatThread[]): void {
+  try {
+    localStorage.setItem(THREADS_KEY, JSON.stringify(threads));
+  } catch (err) {
+    console.error('Error writing chat threads to localStorage:', err);
+  }
+}
+
+export function getActiveThreadId(): string | null {
+  return localStorage.getItem(ACTIVE_THREAD_ID_KEY);
+}
+
+export function setActiveThreadId(id: string | null): void {
+  if (id) {
+    localStorage.setItem(ACTIVE_THREAD_ID_KEY, id);
+  } else {
+    localStorage.removeItem(ACTIVE_THREAD_ID_KEY);
+  }
 }
 
